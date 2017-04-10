@@ -16,49 +16,61 @@
 
 package com.seapip.thomas.pear;
 
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
+import android.support.wearable.complications.ComplicationData;
+import android.support.wearable.complications.ComplicationHelperActivity;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
+import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
-import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
-/**
- * Digital watch face with seconds. In ambient mode, the seconds aren't displayed. On devices with
- * low-bit ambient mode, the text is drawn without anti-aliasing in ambient mode.
- */
 public class ModularWatchFaceService extends CanvasWatchFaceService {
-    private static final Typeface NORMAL_TYPEFACE =
-            Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL);
 
-    /**
-     * Update rate in milliseconds for interactive mode. We update once a second since seconds are
-     * displayed in interactive mode.
-     */
-    private static final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(1);
+    public static final int[][] COMPLICATION_SUPPORTED_TYPES = {
+            {ComplicationData.TYPE_SHORT_TEXT, ComplicationData.TYPE_SMALL_IMAGE, ComplicationData.TYPE_ICON},
+            {ComplicationData.TYPE_SHORT_TEXT, ComplicationData.TYPE_SMALL_IMAGE, ComplicationData.TYPE_ICON},
+            {ComplicationData.TYPE_RANGED_VALUE, ComplicationData.TYPE_SHORT_TEXT, ComplicationData.TYPE_SMALL_IMAGE, ComplicationData.TYPE_ICON},
+            {ComplicationData.TYPE_LONG_TEXT, ComplicationData.TYPE_SHORT_TEXT, ComplicationData.TYPE_SMALL_IMAGE, ComplicationData.TYPE_ICON},
+    };
+    private static final int TOP_DIAL_COMPLICATION = 0;
+    private static final int LEFT_DIAL_COMPLICATION = 1;
+    private static final int RIGHT_DIAL_COMPLICATION = 2;
+    private static final int BOTTOM_DIAL_COMPLICATION = 3;
+    public static final int[] COMPLICATION_IDS = {
+            TOP_DIAL_COMPLICATION,
+            LEFT_DIAL_COMPLICATION,
+            RIGHT_DIAL_COMPLICATION,
+            BOTTOM_DIAL_COMPLICATION
+    };
 
-    /**
-     * Handler message id for updating the time periodically in interactive mode.
-     */
+    private static final long INTERACTIVE_UPDATE_RATE_MS = 32;
+
     private static final int MSG_UPDATE_TIME = 0;
+
+    private SharedPreferences mPrefs;
 
     @Override
     public Engine onCreateEngine() {
@@ -86,45 +98,84 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
     }
 
     private class Engine extends CanvasWatchFaceService.Engine {
-        final Handler mUpdateTimeHandler = new EngineHandler(this);
-        boolean mRegisteredTimeZoneReceiver = false;
-        Paint mBackgroundPaint;
-        Paint mTextPaint;
-        boolean mAmbient;
-        Calendar mCalendar;
-        final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
+        private final Handler mUpdateTimeHandler = new EngineHandler(this);
+
+        private Calendar mCalendar;
+        private final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 mCalendar.setTimeZone(TimeZone.getDefault());
                 invalidate();
             }
         };
-        float mXOffset;
-        float mYOffset;
-        Drawable bg_temp;
+        private boolean mRegisteredTimeZoneReceiver = false;
 
-        /**
-         * Whether the display supports fewer bits for each color in ambient mode. When true, we
-         * disable anti-aliasing in ambient mode.
-         */
-        boolean mLowBitAmbient;
+        /* Display */
+        private boolean mIsRound;
+
+        /* Fonts */
+        private Typeface mFontLight;
+        private Typeface mFontBold;
+        private Typeface mFont;
+
+        /* Complications */
+        private SparseArray<ComplicationData> mActiveComplicationDataSparseArray;
+        private RectF[] mComplicationTapBoxes;
+
+        /* Ambient */
+        private boolean mAmbient;
+        private boolean mLowBitAmbient;
+        private boolean mBurnInProtection;
+
+        /*Modules */
+        private ArrayList<Module> mModules;
+        private ClockModule mClockModule;
+        private Module mModuleA;
+        private Module mModuleB;
+        private Module mModuleC;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(ModularWatchFaceService.this)
+                    .setStatusBarGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL)
                     .setAcceptsTapEvents(true)
                     .build());
-            Resources resources = ModularWatchFaceService.this.getResources();
 
             mCalendar = Calendar.getInstance();
+            mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-            bg_temp = resources.getDrawable(R.drawable.bg_temp, null);
+            initializeFonts();
+            initializeComplications();
+            initializeModules();
+        }
 
-            mTextPaint = new Paint();
-            mTextPaint.setColor(Color.YELLOW);
-            mTextPaint.setTextSize(30);
+        private void initializeFonts() {
+            mFontLight = Typeface.create("sans-serif-light", Typeface.NORMAL);
+            mFontBold = Typeface.create("sans-serif", Typeface.BOLD);
+            mFont = Typeface.create("sans-serif", Typeface.NORMAL);
+        }
+
+        private void initializeComplications() {
+            mActiveComplicationDataSparseArray = new SparseArray<>(COMPLICATION_IDS.length);
+            mComplicationTapBoxes = new RectF[COMPLICATION_IDS.length];
+            setActiveComplications(COMPLICATION_IDS);
+        }
+
+        private void initializeModules() {
+            mClockModule = new ClockModule(mCalendar, true);
+            mModuleA = new ColorModule();
+            mModuleB = new ColorModule();
+            mModuleC = new ColorModule();
+
+            mModules = new ArrayList<>();
+            mModules.add(mClockModule);
+            mModules.add(mModuleA);
+            mModules.add(mModuleB);
+            mModules.add(mModuleC);
+
+            mClockModule.setColor(Color.YELLOW);
         }
 
         @Override
@@ -134,21 +185,139 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
         }
 
         @Override
+        public void onPropertiesChanged(Bundle properties) {
+            super.onPropertiesChanged(properties);
+            mLowBitAmbient = properties.getBoolean(PROPERTY_LOW_BIT_AMBIENT, false);
+            mBurnInProtection = properties.getBoolean(PROPERTY_BURN_IN_PROTECTION, false);
+        }
+
+        @Override
+        public void onComplicationDataUpdate(int complicationId,
+                                             ComplicationData complicationData) {
+            mActiveComplicationDataSparseArray.put(complicationId, complicationData);
+            invalidate();
+        }
+
+
+        @Override
+        public void onTimeTick() {
+            super.onTimeTick();
+            invalidate();
+        }
+
+        @Override
+        public void onAmbientModeChanged(boolean inAmbientMode) {
+            super.onAmbientModeChanged(inAmbientMode);
+            mAmbient = inAmbientMode;
+
+            for (Module module : mModules) {
+                module.setColor(mAmbient ? Color.MAGENTA : Color.YELLOW);
+            }
+            updateTimer();
+        }
+
+        @Override
+        public void onApplyWindowInsets(WindowInsets insets) {
+            super.onApplyWindowInsets(insets);
+            mIsRound = insets.isRound();
+        }
+
+        @Override
+        public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+            super.onSurfaceChanged(holder, format, width, height);
+            int inset = (width - (int) Math.sqrt((width * width) / 2)) / 2;
+            int spacing = 12;
+            Rect bounds = new Rect(inset, inset, width - inset, height - inset);
+
+            if(mAmbient) {
+                spacing = 0;
+            }
+
+            mClockModule.setBounds(new Rect(bounds.left + bounds.width() / 3 + spacing / 2, bounds.top,
+                    bounds.right, bounds.top + bounds.height() / 3 - spacing / 2));
+            mModuleA.setBounds(new Rect(bounds.left, bounds.top,
+                    bounds.left + bounds.width() / 3 - spacing / 2, bounds.top + bounds.height() / 3 - spacing / 2));
+            mModuleB.setBounds(new Rect(bounds.left, bounds.top + bounds.height() / 3 + spacing / 2,
+                    bounds.right, bounds.bottom - bounds.height() / 3 - spacing / 2));
+            mModuleC.setBounds(new Rect(bounds.left, bounds.bottom - bounds.height() / 3 + spacing / 2,
+                    bounds.right, bounds.bottom));
+        }
+
+        @Override
+        public void onTapCommand(int tapType, int x, int y, long eventTime) {
+            switch (tapType) {
+                case TAP_TYPE_TOUCH:
+                    // The user has started touching the screen.
+                    break;
+                case TAP_TYPE_TOUCH_CANCEL:
+                    // The user has started a different gesture or otherwise cancelled the tap.
+                    break;
+                case TAP_TYPE_TAP:
+                    // The user has completed the tap gesture.
+                    for (int i = 0; i < mComplicationTapBoxes.length; i++) {
+                        if (mComplicationTapBoxes[i] != null && mComplicationTapBoxes[i].contains(x, y)) {
+                            onComplicationTapped(i);
+                        }
+                    }
+                    break;
+            }
+            invalidate();
+        }
+
+        private void onComplicationTapped(int id) {
+            ComplicationData complicationData =
+                    mActiveComplicationDataSparseArray.get(id);
+
+            if (complicationData != null) {
+
+                if (complicationData.getTapAction() != null) {
+                    try {
+                        complicationData.getTapAction().send();
+                    } catch (PendingIntent.CanceledException e) {
+                    }
+
+                } else if (complicationData.getType() == ComplicationData.TYPE_NO_PERMISSION) {
+                    ComponentName componentName = new ComponentName(
+                            getApplicationContext(),
+                            ModularWatchFaceService.class);
+
+                    Intent permissionRequestIntent =
+                            ComplicationHelperActivity.createPermissionRequestHelperIntent(
+                                    getApplicationContext(), componentName);
+
+                    startActivity(permissionRequestIntent);
+                }
+            }
+        }
+
+        @Override
+        public void onDraw(Canvas canvas, Rect bounds) {
+            long now = System.currentTimeMillis();
+            mCalendar.setTimeInMillis(now);
+
+            canvas.drawColor(Color.BLACK);
+            Drawable bgTemp = getResources().getDrawable(R.drawable.bg_temp);
+            bgTemp.setBounds(0, 0, bounds.right, bounds.bottom);
+            bgTemp.draw(canvas);
+            for (Module module : mModules) {
+                module.draw(canvas);
+            }
+        }
+
+        @Override
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
 
             if (visible) {
                 registerReceiver();
-
-                // Update time zone in case it changed while we weren't visible.
+                /* Update time zone in case it changed while we weren't visible. */
                 mCalendar.setTimeZone(TimeZone.getDefault());
                 invalidate();
             } else {
                 unregisterReceiver();
             }
 
-            // Whether the timer should be running depends on whether we're visible (as well as
-            // whether we're in ambient mode), so we may need to start or stop the timer.
+            /* Check and trigger whether or not timer should be running (only in active mode). */
             updateTimer();
         }
 
@@ -169,84 +338,8 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
             ModularWatchFaceService.this.unregisterReceiver(mTimeZoneReceiver);
         }
 
-        @Override
-        public void onApplyWindowInsets(WindowInsets insets) {
-            super.onApplyWindowInsets(insets);
-
-            // Load resources that have alternate values for round watches.
-            Resources resources = ModularWatchFaceService.this.getResources();
-            boolean isRound = insets.isRound();
-        }
-
-        @Override
-        public void onPropertiesChanged(Bundle properties) {
-            super.onPropertiesChanged(properties);
-            mLowBitAmbient = properties.getBoolean(PROPERTY_LOW_BIT_AMBIENT, false);
-        }
-
-        @Override
-        public void onTimeTick() {
-            super.onTimeTick();
-            invalidate();
-        }
-
-        @Override
-        public void onAmbientModeChanged(boolean inAmbientMode) {
-            super.onAmbientModeChanged(inAmbientMode);
-            if (mAmbient != inAmbientMode) {
-                mAmbient = inAmbientMode;
-                if (mLowBitAmbient) {
-                    mTextPaint.setAntiAlias(!inAmbientMode);
-                }
-                invalidate();
-            }
-
-            // Whether the timer should be running depends on whether we're visible (as well as
-            // whether we're in ambient mode), so we may need to start or stop the timer.
-            updateTimer();
-        }
-
         /**
-         * Captures tap event (and tap type) and toggles the background color if the user finishes
-         * a tap.
-         */
-        @Override
-        public void onTapCommand(int tapType, int x, int y, long eventTime) {
-            switch (tapType) {
-                case TAP_TYPE_TOUCH:
-                    // The user has started touching the screen.
-                    break;
-                case TAP_TYPE_TOUCH_CANCEL:
-                    // The user has started a different gesture or otherwise cancelled the tap.
-                    break;
-                case TAP_TYPE_TAP:
-                    // The user has completed the tap gesture.
-                    // TODO: Add code to handle the tap gesture.
-                    Toast.makeText(getApplicationContext(), R.string.message, Toast.LENGTH_SHORT)
-                            .show();
-                    break;
-            }
-            invalidate();
-        }
-
-        @Override
-        public void onDraw(Canvas canvas, Rect bounds) {
-            // Draw the background.
-            canvas.drawColor(Color.BLACK);
-
-            bg_temp.setBounds(0, 0, 400, 400);
-            bg_temp.draw(canvas);
-
-            // Draw H:MM in ambient mode or H:MM:SS in interactive mode.
-            long now = System.currentTimeMillis();
-            mCalendar.setTimeInMillis(now);
-
-            canvas.drawText(String.valueOf(mCalendar.get(Calendar.SECOND)), 200 , 200, mTextPaint);
-        }
-
-        /**
-         * Starts the {@link #mUpdateTimeHandler} timer if it should be running and isn't currently
-         * or stops it if it shouldn't be running but currently is.
+         * Starts/stops the {@link #mUpdateTimeHandler} timer based on the state of the watch face.
          */
         private void updateTimer() {
             mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
@@ -256,11 +349,11 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
         }
 
         /**
-         * Returns whether the {@link #mUpdateTimeHandler} timer should be running. The timer should
-         * only run when we're visible and in interactive mode.
+         * Returns whether the {@link #mUpdateTimeHandler} timer should be running. The timer
+         * should only run in active mode.
          */
         private boolean shouldTimerBeRunning() {
-            return isVisible() && !isInAmbientMode();
+            return isVisible() && !mAmbient;
         }
 
         /**

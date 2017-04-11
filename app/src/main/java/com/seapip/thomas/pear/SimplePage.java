@@ -1,10 +1,15 @@
 package com.seapip.thomas.pear;
 
+import java.util.ArrayList;
+
 public class SimplePage {
+    private ArrayList<SettingModuleOverlay> settingModuleOverlays;
 
-    public int mBackgroundId;
+    public SimplePage(ArrayList<SettingModuleOverlay> settingModuleOverlays) {
+        this.settingModuleOverlays = settingModuleOverlays;
+    }
 
-    public SimplePage(int backgroundId) {
-        this.mBackgroundId = backgroundId;
+    public ArrayList<SettingModuleOverlay> getSettingModuleOverlays() {
+        return settingModuleOverlays;
     }
 }

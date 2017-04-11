@@ -33,7 +33,7 @@ public class ClockModule implements Module {
         mTextPaint.setTextAlign(Paint.Align.RIGHT);
         mTextPaint.setTypeface(mFontLight);
         backgroundPaint = new Paint();
-        backgroundPaint.setColor(Color.argb(128, 0, 255, 0));
+        backgroundPaint.setColor(Color.argb(0, 0, 255, 0));
 
     }
 

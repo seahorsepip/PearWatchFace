@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Pear Watch Face</string>
+    <string name="name_modular">Pear Modular</string>
     <string name="message">Watch face tapped</string>
-    <string name="my_digital_name">My Digital</string>
 </resources>

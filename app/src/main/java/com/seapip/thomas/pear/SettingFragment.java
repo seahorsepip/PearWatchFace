@@ -1,50 +1,92 @@
 package com.seapip.thomas.pear;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.ColorFilter;
-import android.graphics.Paint;
-import android.graphics.PixelFormat;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.IntRange;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.wearable.complications.ComplicationProviderInfo;
+import android.support.wearable.complications.ProviderChooserIntent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
-public class SettingFragment  extends Fragment {
+import java.util.ArrayList;
+
+public class SettingFragment extends Fragment implements View.OnTouchListener {
+    private View view;
+    private int row;
+    private int col;
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment, container, false);
-        ImageView imageView = (ImageView) view.findViewById(R.id.imageView);
-        imageView.setImageDrawable(new Drawable() {
+        row = getArguments().getInt("row");
+        col = getArguments().getInt("col");
+        view = new View(getContext()) {
             @Override
-            public void draw(@NonNull Canvas canvas) {
-                Paint line = new Paint();
-                line.setColor(Color.RED);
-                line.setStrokeWidth(4);
-                canvas.drawLine(0, 0, 400, 400, line);
+            protected void onDraw(Canvas canvas) {
+                super.onDraw(canvas);
+                for (SettingModuleOverlay moduleOverlay : getSettingModuleOverlays()) {
+                    moduleOverlay.draw(canvas);
+                }
             }
-
-            @Override
-            public void setAlpha(@IntRange(from = 0, to = 255) int alpha) {
-            }
-
-            @Override
-            public void setColorFilter(@Nullable ColorFilter colorFilter) {
-            }
-
-            @Override
-            public int getOpacity() {
-                return PixelFormat.TRANSPARENT;
-            }
-        });
+        };
+        view.setOnTouchListener(this);
         return view;
     }
 
 
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            SettingModuleOverlay active = null;
+            for (SettingModuleOverlay moduleOverlay : getSettingModuleOverlays()) {
+                if (moduleOverlay.contains((int) event.getX(), (int) event.getY())) {
+                    active = moduleOverlay;
+                }
+            }
+            if (active != null) {
+                if (active.getActive()) {
+                    Intent intent = active.getIntent();
+                    if (intent != null) {
+                        startActivityForResult(intent, active.getRequestCode());
+                    }
+                }
+                for (SettingModuleOverlay moduleOverlay : getSettingModuleOverlays()) {
+                    moduleOverlay.setActive(false);
+                }
+                active.setActive(true);
+            }
+            view.invalidate();
+        }
+        return true;
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+                String title = "Off";
+                if(data != null) {
+                    ComplicationProviderInfo providerInfo =
+                            data.getParcelableExtra(ProviderChooserIntent.EXTRA_PROVIDER_INFO);
+                    if (providerInfo != null) {
+                        title = providerInfo.providerName;
+                    }
+                }
+                getSettingModuleOverlays().get(requestCode).setTitle(title);
+                break;
+        }
+    }
+
+    private ArrayList<SettingModuleOverlay> getSettingModuleOverlays() {
+        return ((SettingsActivity) getActivity()).getSettingModuleOverlays(row, col);
+    }
 }

@@ -13,7 +13,7 @@ public class ColorModule implements Module {
 
     public ColorModule() {
         backgroundPaint = new Paint();
-        backgroundPaint.setColor(Color.argb(128, 0, 255, 0));
+        backgroundPaint.setColor(Color.argb(0, 0, 255, 0));
     }
 
     @Override

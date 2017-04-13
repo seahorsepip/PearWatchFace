@@ -27,7 +27,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,8 +36,6 @@ import android.support.wearable.complications.ComplicationData;
 import android.support.wearable.complications.ComplicationHelperActivity;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
-import android.util.Log;
-import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
@@ -57,6 +54,7 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
             {ComplicationData.TYPE_RANGED_VALUE, ComplicationData.TYPE_SHORT_TEXT, ComplicationData.TYPE_SMALL_IMAGE, ComplicationData.TYPE_ICON},
             {ComplicationData.TYPE_RANGED_VALUE, ComplicationData.TYPE_SHORT_TEXT, ComplicationData.TYPE_SMALL_IMAGE, ComplicationData.TYPE_ICON}
     };
+    public static final int MODULE_SPACING = 10;
     private static final int TOP_LEFT_COMPLICATION = 0;
     private static final int CENTER_COMPLICATION = 1;
     private static final int BOTTOM_LEFT_COMPLICATION = 2;
@@ -69,16 +67,10 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
             BOTTOM_CENTER_COMPLICATION,
             BOTTOM_RIGHT_COMPLICATION
     };
-
     private static final long INTERACTIVE_UPDATE_RATE_MS = 32;
-
     private static final int MSG_UPDATE_TIME = 0;
 
-    public static final int MODULE_SPACING = 12;
-
-    public static boolean SETTINGS_MODE_TRIGGER = false;
-
-    public static boolean SETTINGS_MODE = false;
+    public static int SETTINGS_MODE = 0;
 
     private SharedPreferences mPrefs;
 
@@ -125,13 +117,7 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
         private int mHeight;
         private boolean mIsRound;
 
-        /* Fonts */
-        private Typeface mFontLight;
-        private Typeface mFontBold;
-        private Typeface mFont;
-
         /* Complications */
-        private SparseArray<ComplicationData> mActiveComplicationDataSparseArray;
         private RectF[] mComplicationTapBoxes;
 
         /* Ambient */
@@ -142,9 +128,11 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
         /*Modules */
         private ArrayList<Module> mModules;
         private ClockModule mClockModule;
-        private Module mModuleA;
-        private Module mModuleB;
-        private Module mModuleC;
+        private ComplicationModule mTopLeftComplicationModule;
+        private ComplicationModule mCenterComplicationModule;
+        private ComplicationModule mBottomLeftComplicationModule;
+        private ComplicationModule mBottomCenterComplicationModule;
+        private ComplicationModule mBottomRightComplicationModule;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -164,30 +152,37 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
         }
 
         private void initializeFonts() {
+            /*
             mFontLight = Typeface.create("sans-serif-light", Typeface.NORMAL);
             mFontBold = Typeface.create("sans-serif", Typeface.BOLD);
             mFont = Typeface.create("sans-serif", Typeface.NORMAL);
+            */
         }
 
         private void initializeComplications() {
-            mActiveComplicationDataSparseArray = new SparseArray<>(COMPLICATION_IDS.length);
             mComplicationTapBoxes = new RectF[COMPLICATION_IDS.length];
             setActiveComplications(COMPLICATION_IDS);
         }
 
         private void initializeModules() {
             mClockModule = new ClockModule(mCalendar, true);
-            mModuleA = new ColorModule();
-            mModuleB = new ColorModule();
-            mModuleC = new ColorModule();
+            mTopLeftComplicationModule = new ComplicationModule(getApplicationContext());
+            mCenterComplicationModule = new ComplicationModule(getApplicationContext());
+            mBottomLeftComplicationModule = new ComplicationModule(getApplicationContext());
+            mBottomCenterComplicationModule = new ComplicationModule(getApplicationContext());
+            mBottomRightComplicationModule = new ComplicationModule(getApplicationContext());
 
             mModules = new ArrayList<>();
             mModules.add(mClockModule);
-            mModules.add(mModuleA);
-            mModules.add(mModuleB);
-            mModules.add(mModuleC);
+            mModules.add(mTopLeftComplicationModule);
+            mModules.add(mCenterComplicationModule);
+            mModules.add(mBottomLeftComplicationModule);
+            mModules.add(mBottomCenterComplicationModule);
+            mModules.add(mBottomRightComplicationModule);
 
-            mClockModule.setColor(Color.YELLOW);
+            for (Module module : mModules) {
+                module.setColor(Color.CYAN);
+            }
         }
 
         @Override
@@ -206,7 +201,7 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onComplicationDataUpdate(int complicationId,
                                              ComplicationData complicationData) {
-            mActiveComplicationDataSparseArray.put(complicationId, complicationData);
+            ((ComplicationModule) mModules.get(complicationId + 1)).setComplicationData(complicationData);
             invalidate();
         }
 
@@ -222,9 +217,11 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
             super.onAmbientModeChanged(inAmbientMode);
             mAmbient = inAmbientMode;
             setBounds();
+            /*
             for (Module module : mModules) {
-                module.setColor(mAmbient ? Color.MAGENTA : Color.YELLOW);
+                module.setColor(mAmbient ? Color.CYAN : Color.YELLOW);
             }
+            */
             updateTimer();
         }
 
@@ -244,20 +241,48 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
 
         private void setBounds() {
             int inset = (mWidth - (int) Math.sqrt(mWidth * mWidth / 2)) / 2;
-            if (SETTINGS_MODE) {
+            if (SETTINGS_MODE == 2) {
                 inset += 20;
             }
 
             Rect bounds = new Rect(inset, inset, mWidth - inset, mHeight - inset);
 
-            mClockModule.setBounds(new Rect(bounds.left + bounds.width() / 3 + MODULE_SPACING / 2, bounds.top,
-                    bounds.right, bounds.top + bounds.height() / 3 - MODULE_SPACING / 2));
-            mModuleA.setBounds(new Rect(bounds.left, bounds.top,
-                    bounds.left + bounds.width() / 3 - MODULE_SPACING / 2, bounds.top + bounds.height() / 3 - MODULE_SPACING / 2));
-            mModuleB.setBounds(new Rect(bounds.left, bounds.top + bounds.height() / 3 + MODULE_SPACING / 2,
-                    bounds.right, bounds.bottom - bounds.height() / 3 - MODULE_SPACING / 2));
-            mModuleC.setBounds(new Rect(bounds.left, bounds.bottom - bounds.height() / 3 + MODULE_SPACING / 2,
-                    bounds.right, bounds.bottom));
+            mClockModule.setBounds(new Rect(
+                    bounds.right - (bounds.width() - MODULE_SPACING * 2) / 3 * 2 - MODULE_SPACING,
+                    bounds.top,
+                    bounds.right,
+                    bounds.top + bounds.height() / 3 - MODULE_SPACING / 2)
+            );
+            mTopLeftComplicationModule.setBounds(new Rect(
+                    bounds.left,
+                    bounds.top,
+                    bounds.left + (bounds.width() - MODULE_SPACING * 2) / 3,
+                    bounds.top + (bounds.height() - MODULE_SPACING * 2) / 3)
+            );
+            mCenterComplicationModule.setBounds(new Rect(
+                    bounds.left,
+                    bounds.top + (bounds.height() - MODULE_SPACING * 2) / 3 + MODULE_SPACING,
+                    bounds.right,
+                    bounds.bottom - (bounds.height() - MODULE_SPACING * 2) / 3 - MODULE_SPACING)
+            );
+            mBottomLeftComplicationModule.setBounds(new Rect(
+                    bounds.left,
+                    bounds.bottom - (bounds.height() - MODULE_SPACING * 2) / 3,
+                    bounds.left + (bounds.width() - MODULE_SPACING * 2) / 3,
+                    bounds.bottom)
+            );
+            mBottomCenterComplicationModule.setBounds(new Rect(
+                    bounds.left + (bounds.width() - MODULE_SPACING * 2) / 3 + MODULE_SPACING,
+                    bounds.bottom - (bounds.height() - MODULE_SPACING * 2) / 3,
+                    bounds.right - (bounds.width() - MODULE_SPACING * 2) / 3 - MODULE_SPACING,
+                    bounds.bottom
+            ));
+            mBottomRightComplicationModule.setBounds(new Rect(
+                    bounds.right - (bounds.width() - MODULE_SPACING * 2) / 3,
+                    bounds.bottom - (bounds.height() - MODULE_SPACING * 2) / 3,
+                    bounds.right,
+                    bounds.bottom)
+            );
 
         }
 
@@ -283,8 +308,7 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
         }
 
         private void onComplicationTapped(int id) {
-            ComplicationData complicationData =
-                    mActiveComplicationDataSparseArray.get(id);
+            ComplicationData complicationData = null;
 
             if (complicationData != null) {
 
@@ -313,16 +337,22 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
             long now = System.currentTimeMillis();
             mCalendar.setTimeInMillis(now);
 
-            if (SETTINGS_MODE_TRIGGER) {
+            if (SETTINGS_MODE > 0) {
                 setBounds();
-                SETTINGS_MODE = false;
-                SETTINGS_MODE_TRIGGER = false;
+                SETTINGS_MODE = SETTINGS_MODE == 1 ? 0 : 2;
             }
 
             canvas.drawColor(Color.BLACK);
+            /*
             Drawable bgTemp = getResources().getDrawable(R.drawable.bg_temp);
             bgTemp.setBounds(0, 0, bounds.right, bounds.bottom);
             bgTemp.draw(canvas);
+            */
+
+            for (int x = 0; x < COMPLICATION_IDS.length; x++) {
+                ((ComplicationModule) mModules.get(COMPLICATION_IDS[x] + 1)).setCurrentTimeMillis(now);
+            }
+
             for (Module module : mModules) {
                 module.draw(canvas);
             }

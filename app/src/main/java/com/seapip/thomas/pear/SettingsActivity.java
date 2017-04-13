@@ -20,8 +20,7 @@ public class SettingsActivity extends Activity {
         dots.setPager(mGridPager);
         adapter = new SampleGridPagerAdapter(this, getFragmentManager());
         mGridPager.setAdapter(adapter);
-        ModularWatchFaceService.SETTINGS_MODE_TRIGGER = true;
-        ModularWatchFaceService.SETTINGS_MODE = true;
+        ModularWatchFaceService.SETTINGS_MODE = 2;
     }
 
     @Override
@@ -34,15 +33,13 @@ public class SettingsActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        ModularWatchFaceService.SETTINGS_MODE_TRIGGER = true;
-        ModularWatchFaceService.SETTINGS_MODE = true;
+        ModularWatchFaceService.SETTINGS_MODE = 2;
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        ModularWatchFaceService.SETTINGS_MODE_TRIGGER = true;
-        ModularWatchFaceService.SETTINGS_MODE = false;
+        ModularWatchFaceService.SETTINGS_MODE = 1;
     }
 
     public ArrayList<SettingModuleOverlay> getSettingModuleOverlays(int row, int col) {

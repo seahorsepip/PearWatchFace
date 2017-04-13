@@ -3,6 +3,8 @@ package com.seapip.thomas.pear;
 import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.wearable.complications.ComplicationProviderInfo;
@@ -19,14 +21,21 @@ public class SettingFragment extends Fragment implements View.OnTouchListener {
     private int row;
     private int col;
 
+    /* Paint */
+    Paint overlayPaint;
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         row = getArguments().getInt("row");
         col = getArguments().getInt("col");
+
+        overlayPaint = new Paint();
+        overlayPaint.setColor(Color.argb(192, 0, 0, 0));
         view = new View(getContext()) {
             @Override
             protected void onDraw(Canvas canvas) {
                 super.onDraw(canvas);
+                canvas.drawRect(0, 0, getWidth(), getHeight(), overlayPaint);
                 for (SettingModuleOverlay moduleOverlay : getSettingModuleOverlays()) {
                     moduleOverlay.draw(canvas);
                 }

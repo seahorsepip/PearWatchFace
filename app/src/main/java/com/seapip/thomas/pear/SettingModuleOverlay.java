@@ -5,8 +5,11 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.Xfermode;
 
 public class SettingModuleOverlay {
     private Rect mBounds;
@@ -25,6 +28,7 @@ public class SettingModuleOverlay {
 
     /* Paint */
     private Paint mBoxPaint;
+    private Paint mOverlayRemovePaint;
     private Paint mTitleTextPaint;
     private Paint mTitlePaint;
 
@@ -34,7 +38,6 @@ public class SettingModuleOverlay {
 
     public SettingModuleOverlay(Rect bounds, String title, Paint.Align align, Intent intent, int requestCode) {
         mBounds = bounds;
-        mTitle = title;
         mAlign = align;
         mIntent = intent;
         mRequestCode = requestCode;
@@ -52,6 +55,9 @@ public class SettingModuleOverlay {
         mBoxPaint.setStrokeWidth(2);
         mBoxPaint.setStyle(Paint.Style.STROKE);
         mBoxPaint.setAntiAlias(true);
+        mOverlayRemovePaint = new Paint();
+        mOverlayRemovePaint.setAntiAlias(true);
+        mOverlayRemovePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
         mTitleTextPaint = new Paint();
         mTitleTextPaint.setColor(Color.BLACK);
         mTitleTextPaint.setTypeface(mFontBold);
@@ -64,11 +70,12 @@ public class SettingModuleOverlay {
         mTitlePaint.setAntiAlias(true);
 
         /* Path */
-        mBoxPath = roundedRect(bounds, 20);
+        mBoxPath = roundedRect(bounds, 16);
         setTitle(title);
     }
 
     public void draw(Canvas canvas) {
+        canvas.drawPath(mBoxPath, mOverlayRemovePaint);
         canvas.drawPath(mBoxPath, mBoxPaint);
         if (mActive && mTitle != null) {
             canvas.drawPath(mTitlePath, mTitlePaint);
@@ -76,7 +83,7 @@ public class SettingModuleOverlay {
                     mAlign == Paint.Align.LEFT ? mBounds.left + 7 :
                             mAlign == Paint.Align.CENTER ? mBounds.centerX() - 1:
                                     mBounds.right - 7,
-                    mBounds.top - 24 - (mTitleTextPaint.descent() + mTitleTextPaint.ascent()) / 2,
+                    mBounds.top - 18 - (mTitleTextPaint.descent() + mTitleTextPaint.ascent()) / 2,
                     mTitleTextPaint);
         }
     }
@@ -89,7 +96,8 @@ public class SettingModuleOverlay {
         mTitle = title;
         Rect titleBounds = new Rect();
         mTitleTextPaint.getTextBounds(title.toUpperCase(), 0, title.length(), titleBounds);
-        Rect titleRect = new Rect(mBounds.left - 1, mBounds.top - 40, mBounds.left + titleBounds.width() + 16, mBounds.top - 8);
+        Rect titleRect = new Rect(mBounds.left - 1, mBounds.top - 30,
+                mBounds.left + titleBounds.width() + 16, mBounds.top - 6);
         int width = titleRect.width();
         if (mAlign == Paint.Align.CENTER) {
             titleRect.left += mBounds.width() / 2 - width / 2;
@@ -98,7 +106,7 @@ public class SettingModuleOverlay {
             titleRect.left += mBounds.width() - width + 1;
             titleRect.right += mBounds.width() - width + 1;
         }
-        mTitlePath = roundedRect(titleRect, 10);
+        mTitlePath = roundedRect(titleRect, 4);
     }
 
     public boolean getActive() {

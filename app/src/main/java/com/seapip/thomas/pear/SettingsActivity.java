@@ -9,7 +9,7 @@ import android.view.View;
 import java.util.ArrayList;
 
 public class SettingsActivity extends Activity {
-    private SampleGridPagerAdapter adapter;
+    private SettingsAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,7 +18,7 @@ public class SettingsActivity extends Activity {
         GridViewPager mGridPager = (GridViewPager) findViewById(R.id.pager);
         DotsPageIndicator dots = (DotsPageIndicator) findViewById(R.id.indicator);
         dots.setPager(mGridPager);
-        adapter = new SampleGridPagerAdapter(this, getFragmentManager());
+        adapter = new SettingsAdapter(this, getFragmentManager());
         mGridPager.setAdapter(adapter);
         ModularWatchFaceService.SETTINGS_MODE = 2;
     }
@@ -42,7 +42,7 @@ public class SettingsActivity extends Activity {
         ModularWatchFaceService.SETTINGS_MODE = 1;
     }
 
-    public ArrayList<SettingModuleOverlay> getSettingModuleOverlays(int row, int col) {
+    public ArrayList<SettingOverlay> getSettingModuleOverlays(int row, int col) {
         return adapter.getSettingModuleOverlays(row, col);
     }
 }

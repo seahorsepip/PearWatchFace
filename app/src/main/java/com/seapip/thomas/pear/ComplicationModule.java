@@ -8,7 +8,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.support.wearable.complications.ComplicationData;
@@ -25,9 +24,6 @@ public class ComplicationModule implements Module {
     private boolean mLowBitAmbient;
     private boolean mRangeValue = false;
 
-    /* Fonts */
-    private Typeface mFontBold;
-
     /* Paint */
     private Paint backgroundPaint;
     private Paint mRangeCirclePaint;
@@ -37,12 +33,10 @@ public class ComplicationModule implements Module {
     private Paint mShortTextTextPaint;
     private Paint mLongTextTitlePaint;
     private Paint mLongTextTextPaint;
+    private Paint mSmallImageOverlayPaint;
 
     public ComplicationModule(Context context) {
         mContext = context;
-
-        /* Fonts */
-        mFontBold = Typeface.create("sans-serif", Typeface.BOLD);
 
         /* Paint */
         backgroundPaint = new Paint();
@@ -70,6 +64,8 @@ public class ComplicationModule implements Module {
         mLongTextTextPaint = new Paint();
         mLongTextTextPaint.setAntiAlias(true);
         mLongTextTextPaint.setColor(Color.WHITE);
+        mSmallImageOverlayPaint = new Paint();
+        mSmallImageOverlayPaint.setAntiAlias(true);
     }
 
     @Override
@@ -88,7 +84,7 @@ public class ComplicationModule implements Module {
         if ((mComplicationData != null) && (mComplicationData.isActive(mCurrentTimeMillis))) {
             switch (mComplicationData.getType()) {
                 case ComplicationData.TYPE_RANGED_VALUE:
-                    drawRange(canvas);
+                    drawRangedValue(canvas);
                     break;
                 case ComplicationData.TYPE_SHORT_TEXT:
                     drawShortText(canvas);
@@ -96,11 +92,17 @@ public class ComplicationModule implements Module {
                 case ComplicationData.TYPE_LONG_TEXT:
                     drawLongText(canvas);
                     break;
+                case ComplicationData.TYPE_SMALL_IMAGE:
+                    drawSmallImage(canvas);
+                    break;
+                case ComplicationData.TYPE_ICON:
+                    drawIcon(canvas);
+                    break;
             }
         }
     }
 
-    private void drawRange(Canvas canvas) {
+    private void drawRangedValue(Canvas canvas) {
         float val = mComplicationData.getValue();
         float min = mComplicationData.getMinValue();
         float max = mComplicationData.getMaxValue();
@@ -205,6 +207,43 @@ public class ComplicationModule implements Module {
                 mLongTextTextPaint);
     }
 
+    private void drawSmallImage(Canvas canvas) {
+        Icon icon = mComplicationData.getSmallImage();
+        if (icon != null && !(mAmbient && mBurnInProtection)) {
+            Drawable drawable = icon.loadDrawable(mContext);
+            if (drawable != null) {
+                int size = (int) (mBounds.height() * 0.64);
+                if(mComplicationData.getImageStyle() == ComplicationData.IMAGE_STYLE_PHOTO) {
+                    drawable = DrawableTools.convertToGrayscale(drawable);
+                    drawable = DrawableTools.convertToCircle(drawable);
+                }
+                drawable.setBounds(mBounds.centerX() - size / 2, mBounds.centerY() - size / 2,
+                        mBounds.centerX() + size / 2, mBounds.centerY() + size / 2);
+                drawable.draw(canvas);
+                if(mComplicationData.getImageStyle() == ComplicationData.IMAGE_STYLE_PHOTO) {
+                    canvas.drawCircle(mBounds.centerX(), mBounds.centerY(),
+                            mBounds.height() * 0.32f, mSmallImageOverlayPaint);
+                }
+            }
+        }
+    }
+
+    private void drawIcon(Canvas canvas) {
+        Icon icon = mAmbient && mBurnInProtection &&
+                mComplicationData.getBurnInProtectionIcon() != null ?
+                mComplicationData.getBurnInProtectionIcon() : mComplicationData.getIcon();
+        if (icon != null ) {
+            Drawable drawable = icon.loadDrawable(mContext);
+            if (drawable != null) {
+                int size = (int) (mBounds.height() * 0.4);
+                drawable.setTint(mShortTextTextPaint.getColor());
+                drawable.setBounds(mBounds.centerX() - size / 2, mBounds.centerY() - size / 2,
+                        mBounds.centerX() + size / 2, mBounds.centerY() + size / 2);
+                drawable.draw(canvas);
+            }
+        }
+    }
+
     @Override
     public void setColor(int color) {
         mRangeCirclePaint.setColor(Color.argb(64,
@@ -215,6 +254,10 @@ public class ComplicationModule implements Module {
         mRangeValuePaint.setColor(color);
         mShortTextTextPaint.setColor(color);
         mLongTextTitlePaint.setColor(color);
+        mSmallImageOverlayPaint.setColor(Color.argb(128,
+                Color.red(color),
+                Color.green(color),
+                Color.blue(color)));
     }
 
     public void setComplicationData(ComplicationData complicationData) {

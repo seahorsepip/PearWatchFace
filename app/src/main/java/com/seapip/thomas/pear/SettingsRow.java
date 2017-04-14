@@ -2,15 +2,15 @@ package com.seapip.thomas.pear;
 
 import java.util.ArrayList;
 
-public class SimpleRow {
+public class SettingsRow {
 
-    ArrayList<SimplePage> mPagesRow = new ArrayList<SimplePage>();
+    ArrayList<SettingsPage> mPagesRow = new ArrayList<SettingsPage>();
 
-    public void addPages(SimplePage page) {
+    public void addPages(SettingsPage page) {
         mPagesRow.add(page);
     }
 
-    public SimplePage getPages(int index) {
+    public SettingsPage getPages(int index) {
         return mPagesRow.get(index);
     }
 

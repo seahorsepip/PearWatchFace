@@ -18,7 +18,6 @@ package com.seapip.thomas.pear;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -26,14 +25,11 @@ import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.wearable.complications.ComplicationData;
-import android.support.wearable.complications.ComplicationHelperActivity;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.view.Gravity;
@@ -125,7 +121,7 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
         private ComplicationModule mBottomLeftComplicationModule;
         private ComplicationModule mBottomCenterComplicationModule;
         private ComplicationModule mBottomRightComplicationModule;
-        private ClockModule mClockModule;
+        private DigitalClockModule mDigitalClockModule;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -139,29 +135,14 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
             mCalendar = Calendar.getInstance();
             mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-            initializeComplications();
-            initializeModules();
-        }
-
-        private void initializeFonts() {
-            /*
-            mFontLight = Typeface.create("sans-serif-light", Typeface.NORMAL);
-            mFontBold = Typeface.create("sans-serif", Typeface.BOLD);
-            mFont = Typeface.create("sans-serif", Typeface.NORMAL);
-            */
-        }
-
-        private void initializeComplications() {
             setActiveComplications(COMPLICATION_IDS);
-        }
 
-        private void initializeModules() {
             mTopLeftComplicationModule = new ComplicationModule(getApplicationContext());
             mCenterComplicationModule = new ComplicationModule(getApplicationContext());
             mBottomLeftComplicationModule = new ComplicationModule(getApplicationContext());
             mBottomCenterComplicationModule = new ComplicationModule(getApplicationContext());
             mBottomRightComplicationModule = new ComplicationModule(getApplicationContext());
-            mClockModule = new ClockModule(mCalendar, true);
+            mDigitalClockModule = new DigitalClockModule(mCalendar, true);
 
             mModules = new ArrayList<>();
             mModules.add(mTopLeftComplicationModule);
@@ -169,7 +150,7 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
             mModules.add(mBottomLeftComplicationModule);
             mModules.add(mBottomCenterComplicationModule);
             mModules.add(mBottomRightComplicationModule);
-            mModules.add(mClockModule);
+            mModules.add(mDigitalClockModule);
 
             for (Module module : mModules) {
                 module.setColor(Color.CYAN);
@@ -267,7 +248,7 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
                     bounds.right,
                     bounds.bottom)
             );
-            mClockModule.setBounds(new Rect(
+            mDigitalClockModule.setBounds(new Rect(
                     bounds.right - (bounds.width() - MODULE_SPACING * 2) / 3 * 2 - MODULE_SPACING,
                     bounds.top,
                     bounds.right,
@@ -315,12 +296,6 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
             }
 
             canvas.drawColor(Color.BLACK);
-            /*
-            Drawable bgTemp = getResources().getDrawable(R.drawable.bg_temp);
-            bgTemp.setBounds(0, 0, bounds.right, bounds.bottom);
-            bgTemp.draw(canvas);
-            */
-
             for (Module module : mModules) {
                 if (module instanceof ComplicationModule) {
                     ((ComplicationModule) module).setCurrentTimeMillis(now);

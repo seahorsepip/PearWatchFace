@@ -16,13 +16,14 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 
-public class SettingFragment extends Fragment implements View.OnTouchListener {
+import static android.app.Activity.RESULT_OK;
+
+public class SettingsFragment extends Fragment implements View.OnTouchListener {
+    /* Paint */
+    Paint overlayPaint;
     private View view;
     private int row;
     private int col;
-
-    /* Paint */
-    Paint overlayPaint;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -36,7 +37,7 @@ public class SettingFragment extends Fragment implements View.OnTouchListener {
             protected void onDraw(Canvas canvas) {
                 super.onDraw(canvas);
                 canvas.drawRect(0, 0, getWidth(), getHeight(), overlayPaint);
-                for (SettingModuleOverlay moduleOverlay : getSettingModuleOverlays()) {
+                for (SettingOverlay moduleOverlay : getSettingModuleOverlays()) {
                     moduleOverlay.draw(canvas);
                 }
             }
@@ -49,8 +50,8 @@ public class SettingFragment extends Fragment implements View.OnTouchListener {
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_UP) {
-            SettingModuleOverlay active = null;
-            for (SettingModuleOverlay moduleOverlay : getSettingModuleOverlays()) {
+            SettingOverlay active = null;
+            for (SettingOverlay moduleOverlay : getSettingModuleOverlays()) {
                 if (moduleOverlay.contains((int) event.getX(), (int) event.getY())) {
                     active = moduleOverlay;
                 }
@@ -62,7 +63,7 @@ public class SettingFragment extends Fragment implements View.OnTouchListener {
                         startActivityForResult(intent, active.getRequestCode());
                     }
                 }
-                for (SettingModuleOverlay moduleOverlay : getSettingModuleOverlays()) {
+                for (SettingOverlay moduleOverlay : getSettingModuleOverlays()) {
                     moduleOverlay.setActive(false);
                 }
                 active.setActive(true);
@@ -76,26 +77,25 @@ public class SettingFragment extends Fragment implements View.OnTouchListener {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-                String title = "Off";
-                if(data != null) {
-                    ComplicationProviderInfo providerInfo =
-                            data.getParcelableExtra(ProviderChooserIntent.EXTRA_PROVIDER_INFO);
-                    if (providerInfo != null) {
-                        title = providerInfo.providerName;
+        if (resultCode == RESULT_OK) {
+            for(int id : ModularWatchFaceService.COMPLICATION_IDS) {
+                if(id == requestCode) {
+                    String title = "OFF";
+                    if (data != null) {
+                        ComplicationProviderInfo providerInfo =
+                                data.getParcelableExtra(ProviderChooserIntent.EXTRA_PROVIDER_INFO);
+                        if (providerInfo != null) {
+                            title = providerInfo.providerName;
+                        }
                     }
+                    getSettingModuleOverlays().get(requestCode).setTitle(title);
+                    return;
                 }
-                getSettingModuleOverlays().get(requestCode).setTitle(title);
-                break;
+            }
         }
     }
 
-    private ArrayList<SettingModuleOverlay> getSettingModuleOverlays() {
+    private ArrayList<SettingOverlay> getSettingModuleOverlays() {
         return ((SettingsActivity) getActivity()).getSettingModuleOverlays(row, col);
     }
 }

@@ -8,7 +8,7 @@ import android.graphics.Typeface;
 
 import java.util.Calendar;
 
-public class ClockModule implements Module {
+public class DigitalClockModule implements Module {
     private Rect mBounds;
     private Calendar mCalendar;
     private boolean mTimeFormat24;
@@ -20,7 +20,7 @@ public class ClockModule implements Module {
     private Paint mTextPaint;
     private Paint backgroundPaint;
 
-    public ClockModule(Calendar calendar, boolean timeFormat24) {
+    public DigitalClockModule(Calendar calendar, boolean timeFormat24) {
         mCalendar = calendar;
         mTimeFormat24 = timeFormat24;
 

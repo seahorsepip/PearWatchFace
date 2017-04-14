@@ -152,8 +152,10 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
             mModules.add(mBottomRightComplicationModule);
             mModules.add(mDigitalClockModule);
 
+            int color = mPrefs.getInt("settings_color_value",
+                    Color.parseColor("#18FFFF"));
             for (Module module : mModules) {
-                module.setColor(Color.CYAN);
+                module.setColor(color);
             }
         }
 
@@ -292,6 +294,11 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
 
             if (SETTINGS_MODE > 0) {
                 setBounds();
+                int color = mPrefs.getInt("settings_color_value",
+                        Color.parseColor("#18FFFF"));
+                for (Module module : mModules) {
+                    module.setColor(color);
+                }
                 SETTINGS_MODE = SETTINGS_MODE == 1 ? 0 : 2;
             }
 

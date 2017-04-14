@@ -2,10 +2,12 @@ package com.seapip.thomas.pear;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.wearable.complications.ComplicationProviderInfo;
 import android.support.wearable.complications.ProviderChooserIntent;
@@ -20,38 +22,42 @@ import static android.app.Activity.RESULT_OK;
 
 public class SettingsFragment extends Fragment implements View.OnTouchListener {
     /* Paint */
-    Paint overlayPaint;
-    private View view;
-    private int row;
-    private int col;
+    Paint mOverlayPaint;
+    private View mView;
+    private int mRow;
+    private int mCol;
+    private SharedPreferences mPrefs;
+
+    public static final int COLOR_REQUEST = 10;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        row = getArguments().getInt("row");
-        col = getArguments().getInt("col");
+        mRow = getArguments().getInt("row");
+        mCol = getArguments().getInt("col");
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(getContext().getApplicationContext());
 
-        overlayPaint = new Paint();
-        overlayPaint.setColor(Color.argb(192, 0, 0, 0));
-        view = new View(getContext()) {
+        mOverlayPaint = new Paint();
+        mOverlayPaint.setColor(Color.argb(192, 0, 0, 0));
+        mView = new View(getContext()) {
             @Override
             protected void onDraw(Canvas canvas) {
                 super.onDraw(canvas);
-                canvas.drawRect(0, 0, getWidth(), getHeight(), overlayPaint);
-                for (SettingOverlay moduleOverlay : getSettingModuleOverlays()) {
+                canvas.drawRect(0, 0, getWidth(), getHeight(), mOverlayPaint);
+                for (SettingsOverlay moduleOverlay : getSettingModuleOverlays()) {
                     moduleOverlay.draw(canvas);
                 }
             }
         };
-        view.setOnTouchListener(this);
-        return view;
+        mView.setOnTouchListener(this);
+        return mView;
     }
 
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_UP) {
-            SettingOverlay active = null;
-            for (SettingOverlay moduleOverlay : getSettingModuleOverlays()) {
+            SettingsOverlay active = null;
+            for (SettingsOverlay moduleOverlay : getSettingModuleOverlays()) {
                 if (moduleOverlay.contains((int) event.getX(), (int) event.getY())) {
                     active = moduleOverlay;
                 }
@@ -63,12 +69,12 @@ public class SettingsFragment extends Fragment implements View.OnTouchListener {
                         startActivityForResult(intent, active.getRequestCode());
                     }
                 }
-                for (SettingOverlay moduleOverlay : getSettingModuleOverlays()) {
+                for (SettingsOverlay moduleOverlay : getSettingModuleOverlays()) {
                     moduleOverlay.setActive(false);
                 }
                 active.setActive(true);
             }
-            view.invalidate();
+            mView.invalidate();
         }
         return true;
     }
@@ -78,24 +84,37 @@ public class SettingsFragment extends Fragment implements View.OnTouchListener {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            for(int id : ModularWatchFaceService.COMPLICATION_IDS) {
-                if(id == requestCode) {
-                    String title = "OFF";
-                    if (data != null) {
-                        ComplicationProviderInfo providerInfo =
-                                data.getParcelableExtra(ProviderChooserIntent.EXTRA_PROVIDER_INFO);
-                        if (providerInfo != null) {
-                            title = providerInfo.providerName;
+            String title;
+            SharedPreferences.Editor editor = mPrefs.edit();
+            switch (requestCode) {
+                case COLOR_REQUEST:
+                    title = data.getStringExtra("color_name");
+                    editor.putString("settings_color_name", title);
+                    editor.putInt("settings_color_value", data.getIntExtra("color_value", 0));
+                    editor.apply();
+                    getSettingModuleOverlays().get(0).setTitle(title);
+                    break;
+                default:
+                    for (int id : ModularWatchFaceService.COMPLICATION_IDS) {
+                        if (id == requestCode) {
+                            title = "OFF";
+                            if (data != null) {
+                                ComplicationProviderInfo providerInfo =
+                                        data.getParcelableExtra(ProviderChooserIntent.EXTRA_PROVIDER_INFO);
+                                if (providerInfo != null) {
+                                    title = providerInfo.providerName;
+                                }
+                            }
+                            getSettingModuleOverlays().get(requestCode).setTitle(title);
+                            return;
                         }
                     }
-                    getSettingModuleOverlays().get(requestCode).setTitle(title);
-                    return;
-                }
+                    break;
             }
         }
     }
 
-    private ArrayList<SettingOverlay> getSettingModuleOverlays() {
-        return ((SettingsActivity) getActivity()).getSettingModuleOverlays(row, col);
+    private ArrayList<SettingsOverlay> getSettingModuleOverlays() {
+        return ((SettingsActivity) getActivity()).getSettingModuleOverlays(mRow, mCol);
     }
 }

@@ -11,7 +11,7 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.Xfermode;
 
-public class SettingOverlay {
+public class SettingsOverlay {
     private Rect mBounds;
     private String mTitle;
     private Paint.Align mAlign;
@@ -36,7 +36,7 @@ public class SettingOverlay {
     private Path mBoxPath;
     private Path mTitlePath;
 
-    public SettingOverlay(Rect bounds, String title, Paint.Align align, Intent intent, int requestCode) {
+    public SettingsOverlay(Rect bounds, String title, Paint.Align align, Intent intent, int requestCode) {
         mBounds = bounds;
         mAlign = align;
         mIntent = intent;
@@ -44,7 +44,7 @@ public class SettingOverlay {
 
         /* Colors */
         mColor = Color.argb(102, 255, 255, 255);
-        mActiveColor = Color.parseColor("#00c885");
+        mActiveColor = Color.parseColor("#20c080");
 
         /* Fonts */
         mFontBold = Typeface.create("sans-serif", Typeface.BOLD);

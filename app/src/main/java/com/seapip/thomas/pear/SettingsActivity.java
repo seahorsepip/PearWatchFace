@@ -42,7 +42,7 @@ public class SettingsActivity extends Activity {
         ModularWatchFaceService.SETTINGS_MODE = 1;
     }
 
-    public ArrayList<SettingOverlay> getSettingModuleOverlays(int row, int col) {
+    public ArrayList<SettingsOverlay> getSettingModuleOverlays(int row, int col) {
         return adapter.getSettingModuleOverlays(row, col);
     }
 }

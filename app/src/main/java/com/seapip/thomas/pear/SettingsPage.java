@@ -3,13 +3,13 @@ package com.seapip.thomas.pear;
 import java.util.ArrayList;
 
 public class SettingsPage {
-    private ArrayList<SettingOverlay> settingOverlays;
+    private ArrayList<SettingsOverlay> settingOverlays;
 
-    public SettingsPage(ArrayList<SettingOverlay> settingOverlays) {
+    public SettingsPage(ArrayList<SettingsOverlay> settingOverlays) {
         this.settingOverlays = settingOverlays;
     }
 
-    public ArrayList<SettingOverlay> getSettingOverlays() {
+    public ArrayList<SettingsOverlay> getSettingOverlays() {
         return settingOverlays;
     }
 }

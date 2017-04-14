@@ -4,9 +4,13 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.wearable.complications.ComplicationHelperActivity;
@@ -22,11 +26,13 @@ public class SettingsAdapter extends FragmentGridPagerAdapter {
 
     private final Context mContext;
     private ArrayList<SettingsRow> mPages;
-    private ArrayList<SettingOverlay> complicationModules;
+    private ArrayList<SettingsOverlay> mComplicationModules;
+    private SharedPreferences mPrefs;
 
     public SettingsAdapter(Context context, FragmentManager fragmentManager) {
         super(fragmentManager);
         mContext = context;
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext.getApplicationContext());
         initPages();
         ProviderInfoRetriever providerInfoRetriever = new ProviderInfoRetriever(mContext, new Executor() {
             @Override
@@ -43,7 +49,7 @@ public class SettingsAdapter extends FragmentGridPagerAdapter {
                         if(complicationProviderInfo != null) {
                             title = complicationProviderInfo.providerName;
                         }
-                        complicationModules.get(i).setTitle(title);
+                        mComplicationModules.get(i).setTitle(title);
                     }
 
                 },
@@ -62,14 +68,21 @@ public class SettingsAdapter extends FragmentGridPagerAdapter {
         int inset = (width - (int) Math.sqrt(width * width / 2)) / 2 + 20;
         Rect bounds = new Rect(inset, inset, width - inset, height - inset);
 
-        ArrayList<SettingOverlay> colorModules = new ArrayList<>();
-        SettingOverlay colorModuleOverlay = new SettingOverlay(bounds, "Cyan",
-                Paint.Align.LEFT, null, 12);
+
+        Intent colorIntent = new Intent(mContext, ColorActivity.class);
+        colorIntent.putExtra("color", mPrefs.getInt("settings_color_value",
+                Color.parseColor("#18FFFF")));
+        colorIntent.putExtra("color_names_id", R.array.color_names);
+        colorIntent.putExtra("color_values_id", R.array.color_values);
+        ArrayList<SettingsOverlay> colorModules = new ArrayList<>();
+        SettingsOverlay colorModuleOverlay = new SettingsOverlay(bounds,
+                mPrefs.getString("settings_color_name", "Cyan"),
+                Paint.Align.LEFT, colorIntent, SettingsFragment.COLOR_REQUEST);
         colorModules.add(colorModuleOverlay);
         colorModuleOverlay.setActive(true);
 
-        complicationModules = new ArrayList<>();
-        SettingOverlay complicationTopLeftModuleOverlay = new SettingOverlay(
+        mComplicationModules = new ArrayList<>();
+        SettingsOverlay complicationTopLeftModuleOverlay = new SettingsOverlay(
                 new Rect(bounds.left,
                         bounds.top,
                         bounds.left + (bounds.width() - spacing * 2) / 3,
@@ -82,7 +95,7 @@ public class SettingsAdapter extends FragmentGridPagerAdapter {
                         ModularWatchFaceService.COMPLICATION_IDS[0],
                         ModularWatchFaceService.COMPLICATION_SUPPORTED_TYPES[0]), 0
         );
-        SettingOverlay complicationCenterModuleOverlay = new SettingOverlay(
+        SettingsOverlay complicationCenterModuleOverlay = new SettingsOverlay(
                 new Rect(bounds.left,
                         bounds.top + (bounds.height() - spacing * 2) / 3 + spacing,
                         bounds.right,
@@ -95,7 +108,7 @@ public class SettingsAdapter extends FragmentGridPagerAdapter {
                         ModularWatchFaceService.COMPLICATION_IDS[1],
                         ModularWatchFaceService.COMPLICATION_SUPPORTED_TYPES[1]), 1
         );
-        SettingOverlay complicationBottomLeftModuleOverlay = new SettingOverlay(
+        SettingsOverlay complicationBottomLeftModuleOverlay = new SettingsOverlay(
                 new Rect(bounds.left,
                         bounds.bottom - (bounds.height() - spacing * 2) / 3,
                         bounds.left + (bounds.width() - spacing * 2) / 3,
@@ -108,7 +121,7 @@ public class SettingsAdapter extends FragmentGridPagerAdapter {
                         ModularWatchFaceService.COMPLICATION_IDS[2],
                         ModularWatchFaceService.COMPLICATION_SUPPORTED_TYPES[2]), 2
         );
-        SettingOverlay complicationBottomCenterModuleOverlay = new SettingOverlay(
+        SettingsOverlay complicationBottomCenterModuleOverlay = new SettingsOverlay(
                 new Rect(bounds.left + (bounds.width() - spacing * 2) / 3 + spacing,
                         bounds.bottom - (bounds.height() - spacing * 2) / 3,
                         bounds.right - (bounds.width() - spacing * 2) / 3 - spacing,
@@ -121,7 +134,7 @@ public class SettingsAdapter extends FragmentGridPagerAdapter {
                         ModularWatchFaceService.COMPLICATION_IDS[3],
                         ModularWatchFaceService.COMPLICATION_SUPPORTED_TYPES[3]), 3
         );
-        SettingOverlay complicationBottomRightModuleOverlay = new SettingOverlay(
+        SettingsOverlay complicationBottomRightModuleOverlay = new SettingsOverlay(
                 new Rect(bounds.right - (bounds.width() - spacing * 2) / 3,
                         bounds.bottom - (bounds.height() - spacing * 2) / 3,
                         bounds.right,
@@ -134,16 +147,16 @@ public class SettingsAdapter extends FragmentGridPagerAdapter {
                         ModularWatchFaceService.COMPLICATION_IDS[4],
                         ModularWatchFaceService.COMPLICATION_SUPPORTED_TYPES[4]), 4
         );
-        complicationModules.add(complicationTopLeftModuleOverlay);
-        complicationModules.add(complicationCenterModuleOverlay);
-        complicationModules.add(complicationBottomLeftModuleOverlay);
-        complicationModules.add(complicationBottomCenterModuleOverlay);
-        complicationModules.add(complicationBottomRightModuleOverlay);
+        mComplicationModules.add(complicationTopLeftModuleOverlay);
+        mComplicationModules.add(complicationCenterModuleOverlay);
+        mComplicationModules.add(complicationBottomLeftModuleOverlay);
+        mComplicationModules.add(complicationBottomCenterModuleOverlay);
+        mComplicationModules.add(complicationBottomRightModuleOverlay);
         complicationTopLeftModuleOverlay.setActive(true);
 
         SettingsRow row = new SettingsRow();
         row.addPages(new SettingsPage(colorModules));
-        row.addPages(new SettingsPage(complicationModules));
+        row.addPages(new SettingsPage(mComplicationModules));
         mPages.add(row);
     }
 
@@ -157,7 +170,7 @@ public class SettingsAdapter extends FragmentGridPagerAdapter {
         return settingsFragment;
     }
 
-    public ArrayList<SettingOverlay> getSettingModuleOverlays(int row, int col) {
+    public ArrayList<SettingsOverlay> getSettingModuleOverlays(int row, int col) {
         SettingsPage page = (mPages.get(row)).getPages(col);
         return page.getSettingOverlays();
     }

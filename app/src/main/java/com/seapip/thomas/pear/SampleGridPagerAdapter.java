@@ -32,7 +32,7 @@ public class SampleGridPagerAdapter extends FragmentGridPagerAdapter {
     }
 
     private void initPages() {
-        mPages = new ArrayList<SimpleRow>();
+        mPages = new ArrayList<>();
 
         DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
         int width = metrics.widthPixels;
@@ -53,7 +53,7 @@ public class SampleGridPagerAdapter extends FragmentGridPagerAdapter {
                         bounds.top,
                         bounds.left + (bounds.width() - spacing * 2) / 3,
                         bounds.top + (bounds.height() - spacing * 2) / 3),
-                "Date", Paint.Align.LEFT,
+                "OFF", Paint.Align.LEFT,
                 ComplicationHelperActivity.createProviderChooserHelperIntent(
                         mContext,
                         new ComponentName(mContext.getApplicationContext(),
@@ -65,7 +65,7 @@ public class SampleGridPagerAdapter extends FragmentGridPagerAdapter {
                 new Rect(bounds.left,
                         bounds.top + (bounds.height() - spacing * 2) / 3 + spacing,
                         bounds.right,
-                        bounds.bottom - (bounds.height() - spacing * 2) / 3 - spacing), "Events",
+                        bounds.bottom - (bounds.height() - spacing * 2) / 3 - spacing), "OFF",
                 Paint.Align.CENTER,
                 ComplicationHelperActivity.createProviderChooserHelperIntent(
                         mContext,
@@ -78,7 +78,7 @@ public class SampleGridPagerAdapter extends FragmentGridPagerAdapter {
                 new Rect(bounds.left,
                         bounds.bottom - (bounds.height() - spacing * 2) / 3,
                         bounds.left + (bounds.width() - spacing * 2) / 3,
-                        bounds.bottom), "Weather",
+                        bounds.bottom), "OFF",
                 Paint.Align.LEFT,
                 ComplicationHelperActivity.createProviderChooserHelperIntent(
                         mContext,
@@ -91,7 +91,7 @@ public class SampleGridPagerAdapter extends FragmentGridPagerAdapter {
                 new Rect(bounds.left + (bounds.width() - spacing * 2) / 3 + spacing,
                         bounds.bottom - (bounds.height() - spacing * 2) / 3,
                         bounds.right - (bounds.width() - spacing * 2) / 3 - spacing,
-                        bounds.bottom), "World Clock",
+                        bounds.bottom), "OFF",
                 Paint.Align.CENTER,
                 ComplicationHelperActivity.createProviderChooserHelperIntent(
                         mContext,
@@ -104,7 +104,7 @@ public class SampleGridPagerAdapter extends FragmentGridPagerAdapter {
                 new Rect(bounds.right - (bounds.width() - spacing * 2) / 3,
                         bounds.bottom - (bounds.height() - spacing * 2) / 3,
                         bounds.right,
-                        bounds.bottom), "Battery",
+                        bounds.bottom), "OFF",
                 Paint.Align.RIGHT,
                 ComplicationHelperActivity.createProviderChooserHelperIntent(
                         mContext,

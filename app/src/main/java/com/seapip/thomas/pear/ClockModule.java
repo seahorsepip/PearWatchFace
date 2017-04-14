@@ -33,7 +33,7 @@ public class ClockModule implements Module {
         mTextPaint.setTextAlign(Paint.Align.RIGHT);
         mTextPaint.setTypeface(mFontLight);
         backgroundPaint = new Paint();
-        backgroundPaint.setColor(Color.argb(0, 0, 255, 0));
+        backgroundPaint.setColor(Color.argb(20, 0, 255, 0));
 
     }
 
@@ -60,13 +60,24 @@ public class ClockModule implements Module {
             minuteString = "0" + minuteString;
         }
 
-        canvas.drawRect(mBounds, backgroundPaint);
-        canvas.drawText(hourString + ":" + minuteString, mBounds.right,
+        canvas.drawText(hourString + ":" + minuteString, mBounds.right - mBounds.height() * 0.05f,
                 mBounds.centerY() - (mTextPaint.descent() + mTextPaint.ascent()) / 2, mTextPaint);
     }
 
     @Override
     public void setColor(int color) {
         mTextPaint.setColor(color);
+    }
+
+    @Override
+    public void setAmbient(boolean ambient) {
+    }
+
+    @Override
+    public void setBurnInProtection(boolean burnInProtection) {
+    }
+
+    @Override
+    public void setLowBitAmbient(boolean lowBitAmbient) {
     }
 }

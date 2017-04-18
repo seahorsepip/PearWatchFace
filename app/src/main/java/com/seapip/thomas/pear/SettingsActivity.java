@@ -2,6 +2,7 @@ package com.seapip.thomas.pear;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.wearable.complications.ProviderInfoRetriever;
 import android.support.wearable.view.DotsPageIndicator;
 import android.support.wearable.view.GridViewPager;
 import android.view.View;
@@ -24,13 +25,6 @@ public class SettingsActivity extends Activity {
     }
 
     @Override
-    public void setContentView(View view) {
-        getWindow().setExitTransition(null);
-        getWindow().setEnterTransition(null);
-        super.setContentView(view);
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         ModularWatchFaceService.SETTINGS_MODE = 2;
@@ -40,6 +34,12 @@ public class SettingsActivity extends Activity {
     protected void onPause() {
         super.onPause();
         ModularWatchFaceService.SETTINGS_MODE = 1;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        adapter.providerInfoRetriever.release();
     }
 
     public ArrayList<SettingsOverlay> getSettingModuleOverlays(int row, int col) {

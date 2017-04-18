@@ -24,7 +24,8 @@ import java.util.concurrent.Executor;
 
 public class SettingsAdapter extends FragmentGridPagerAdapter {
 
-    private final Context mContext;
+    public ProviderInfoRetriever providerInfoRetriever;
+    private Context mContext;
     private ArrayList<SettingsRow> mPages;
     private ArrayList<SettingsOverlay> mComplicationModules;
     private SharedPreferences mPrefs;
@@ -34,7 +35,7 @@ public class SettingsAdapter extends FragmentGridPagerAdapter {
         mContext = context;
         mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext.getApplicationContext());
         initPages();
-        ProviderInfoRetriever providerInfoRetriever = new ProviderInfoRetriever(mContext, new Executor() {
+        providerInfoRetriever = new ProviderInfoRetriever(mContext, new Executor() {
             @Override
             public void execute(@NonNull Runnable r) {
                 new Thread(r).start();
@@ -46,7 +47,7 @@ public class SettingsAdapter extends FragmentGridPagerAdapter {
                     @Override
                     public void onProviderInfoReceived(int i, @Nullable ComplicationProviderInfo complicationProviderInfo) {
                         String title = "OFF";
-                        if(complicationProviderInfo != null) {
+                        if (complicationProviderInfo != null) {
                             title = complicationProviderInfo.providerName;
                         }
                         mComplicationModules.get(i).setTitle(title);

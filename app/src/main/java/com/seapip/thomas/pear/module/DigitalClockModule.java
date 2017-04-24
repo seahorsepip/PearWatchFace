@@ -1,4 +1,4 @@
-package com.seapip.thomas.pear;
+package com.seapip.thomas.pear.module;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,6 +12,7 @@ public class DigitalClockModule implements Module {
     private Rect mBounds;
     private Calendar mCalendar;
     private boolean mTimeFormat24;
+    private boolean mAmbient;
 
     /* Fonts */
     private Typeface mFontLight;
@@ -40,7 +41,7 @@ public class DigitalClockModule implements Module {
     @Override
     public void setBounds(Rect bounds) {
         mBounds = bounds;
-        mTextPaint.setTextSize(bounds.height() * 0.85f);
+        mTextPaint.setTextSize(bounds.height() * 0.80f);
     }
 
     @Override
@@ -60,8 +61,15 @@ public class DigitalClockModule implements Module {
             minuteString = "0" + minuteString;
         }
 
-        canvas.drawText(hourString + ":" + minuteString, mBounds.right - mBounds.height() * 0.05f,
-                mBounds.centerY() - (mTextPaint.descent() + mTextPaint.ascent()) / 2, mTextPaint);
+        float x = mBounds.right - mBounds.height() * 0.05f;
+        float y = mBounds.centerY() - (mTextPaint.descent() + mTextPaint.ascent()) / 2;
+
+        mTextPaint.setAlpha(255);
+        canvas.drawText(hourString + " " + minuteString, x, y, mTextPaint);
+        int alpha = mAmbient ? 164 :
+                (int) (Math.abs(mCalendar.get(Calendar.MILLISECOND) / 1000f - 0.5f) * 2 * 128 + 128);
+        mTextPaint.setAlpha(alpha);
+        canvas.drawText(":", x - mTextPaint.measureText(minuteString), y, mTextPaint);
     }
 
     @Override
@@ -71,6 +79,7 @@ public class DigitalClockModule implements Module {
 
     @Override
     public void setAmbient(boolean ambient) {
+        mAmbient = ambient;
     }
 
     @Override

@@ -52,6 +52,30 @@
         </service>
 
         <service
+            android:name=".MotionWatchFaceService"
+            android:label="@string/name_motion"
+            android:permission="android.permission.BIND_WALLPAPER">
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/watch_face" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview"
+                android:resource="@drawable/preview_digital" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview_circular"
+                android:resource="@drawable/preview_digital_circular" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.wearableConfigurationAction"
+                android:value="com.example.android.wearable.watchface.CONFIG_ANIMATION_WATCH_FACE" />
+
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+
+                <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
+            </intent-filter>
+        </service>
+
+        <service
             android:name=".provider.DateProviderService"
             android:icon="@mipmap/ic_launcher"
             android:label="Date"
@@ -69,11 +93,23 @@
         </service>
 
         <activity
-            android:name=".SettingsActivity"
+            android:name=".ModularSettingsActivity"
             android:label="Settings"
             android:theme="@style/Theme.Transparent">
             <intent-filter>
                 <action android:name="com.example.android.wearable.watchface.CONFIG_MODULAR_WATCH_FACE" />
+
+                <category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".MotionSettingsActivity"
+            android:label="Settings"
+            android:theme="@style/Theme.Transparent">
+            <intent-filter>
+                <action android:name="com.example.android.wearable.watchface.CONFIG_ANIMATION_WATCH_FACE" />
 
                 <category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />

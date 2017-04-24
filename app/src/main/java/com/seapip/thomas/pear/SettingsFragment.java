@@ -65,8 +65,11 @@ public class SettingsFragment extends Fragment implements View.OnTouchListener {
             if (active != null) {
                 if (active.getActive()) {
                     Intent intent = active.getIntent();
+                    Runnable runnable = active.getRunnable();
                     if (intent != null) {
                         startActivityForResult(intent, active.getRequestCode());
+                    } else if(runnable != null) {
+                        runnable.run();
                     }
                 }
                 for (SettingsOverlay moduleOverlay : getSettingModuleOverlays()) {
@@ -93,6 +96,7 @@ public class SettingsFragment extends Fragment implements View.OnTouchListener {
                     editor.putInt("settings_color_value", data.getIntExtra("color_value", 0));
                     editor.apply();
                     getSettingModuleOverlays().get(0).setTitle(title);
+                    updateSettings();
                     break;
                 default:
                     for (int id : ModularWatchFaceService.COMPLICATION_IDS) {
@@ -112,6 +116,10 @@ public class SettingsFragment extends Fragment implements View.OnTouchListener {
                     break;
             }
         }
+    }
+
+    private void updateSettings() {
+        ((SettingsActivity) getActivity()).setSettingsMode(true);
     }
 
     private ArrayList<SettingsOverlay> getSettingModuleOverlays() {

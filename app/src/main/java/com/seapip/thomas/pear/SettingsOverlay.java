@@ -9,15 +9,18 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.graphics.Xfermode;
+
+import java.util.concurrent.Callable;
 
 public class SettingsOverlay {
     private Rect mBounds;
     private String mTitle;
     private Paint.Align mAlign;
     private Intent mIntent;
+    private Runnable mRunnable;
     private int mRequestCode;
     private boolean mActive;
+    private boolean mRound;
 
     /* Colors */
     private int mColor;
@@ -37,14 +40,18 @@ public class SettingsOverlay {
     private Path mTitlePath;
 
     public SettingsOverlay(Rect bounds, String title, Paint.Align align, Intent intent, int requestCode) {
-        mBounds = bounds;
-        mAlign = align;
+        this(bounds, title, align);
         mIntent = intent;
         mRequestCode = requestCode;
+    }
+
+    public SettingsOverlay(Rect bounds, String title, Paint.Align align) {
+        mBounds = bounds;
+        mAlign = align;
 
         /* Colors */
         mColor = Color.argb(102, 255, 255, 255);
-        mActiveColor = Color.parseColor("#20c080");
+        mActiveColor = Color.parseColor("#69F0AE");
 
         /* Fonts */
         mFontBold = Typeface.create("sans-serif", Typeface.BOLD);
@@ -61,7 +68,7 @@ public class SettingsOverlay {
         mTitleTextPaint = new Paint();
         mTitleTextPaint.setColor(Color.BLACK);
         mTitleTextPaint.setTypeface(mFontBold);
-        mTitleTextPaint.setTextSize(20);
+        mTitleTextPaint.setTextSize(18);
         mTitleTextPaint.setAntiAlias(true);
         mTitleTextPaint.setTextAlign(align);
         mTitlePaint = new Paint();
@@ -75,13 +82,20 @@ public class SettingsOverlay {
     }
 
     public void draw(Canvas canvas) {
-        canvas.drawPath(mBoxPath, mOverlayRemovePaint);
-        canvas.drawPath(mBoxPath, mBoxPaint);
+        if (mRound) {
+            canvas.drawCircle(mBounds.centerX(), mBounds.centerY(),
+                    mBounds.width() / 2, mOverlayRemovePaint);
+            canvas.drawCircle(mBounds.centerX(), mBounds.centerY(),
+                    mBounds.width() / 2, mBoxPaint);
+        } else {
+            canvas.drawPath(mBoxPath, mOverlayRemovePaint);
+            canvas.drawPath(mBoxPath, mBoxPaint);
+        }
         if (mActive && mTitle != null) {
             canvas.drawPath(mTitlePath, mTitlePaint);
             canvas.drawText(mTitle.toUpperCase(),
                     mAlign == Paint.Align.LEFT ? mBounds.left + 7 :
-                            mAlign == Paint.Align.CENTER ? mBounds.centerX() - 1:
+                            mAlign == Paint.Align.CENTER ? mBounds.centerX() - 1 :
                                     mBounds.right - 7,
                     mBounds.top - 18 - (mTitleTextPaint.descent() + mTitleTextPaint.ascent()) / 2,
                     mTitleTextPaint);
@@ -94,10 +108,10 @@ public class SettingsOverlay {
 
     public void setTitle(String title) {
         mTitle = title;
-        Rect titleBounds = new Rect();
-        mTitleTextPaint.getTextBounds(title.toUpperCase(), 0, title.length(), titleBounds);
-        Rect titleRect = new Rect(mBounds.left - 1, mBounds.top - 30,
-                mBounds.left + titleBounds.width() + 16, mBounds.top - 6);
+        Rect titleRect = new Rect(mBounds.left - 1,
+                mBounds.top - 30,
+                mBounds.left + (int) mTitleTextPaint.measureText(title.toUpperCase()) + 16,
+                mBounds.top - 6);
         int width = titleRect.width();
         if (mAlign == Paint.Align.CENTER) {
             titleRect.left += mBounds.width() / 2 - width / 2;
@@ -118,8 +132,20 @@ public class SettingsOverlay {
         mBoxPaint.setColor(active ? mActiveColor : mColor);
     }
 
+    public void setRound(boolean round) {
+        mRound = round;
+    }
+
     public Intent getIntent() {
         return mIntent;
+    }
+
+    public Runnable getRunnable() {
+        return mRunnable;
+    }
+
+    public void setRunnable(Runnable runnable) {
+        mRunnable = runnable;
     }
 
     public int getRequestCode() {

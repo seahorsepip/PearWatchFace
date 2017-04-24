@@ -2,47 +2,42 @@ package com.seapip.thomas.pear;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.wearable.complications.ProviderInfoRetriever;
+import android.support.annotation.Nullable;
 import android.support.wearable.view.DotsPageIndicator;
 import android.support.wearable.view.GridViewPager;
-import android.view.View;
 
 import java.util.ArrayList;
 
 public class SettingsActivity extends Activity {
-    private SettingsAdapter adapter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.grid);
-        GridViewPager mGridPager = (GridViewPager) findViewById(R.id.pager);
-        DotsPageIndicator dots = (DotsPageIndicator) findViewById(R.id.indicator);
-        dots.setPager(mGridPager);
-        adapter = new SettingsAdapter(this, getFragmentManager());
-        mGridPager.setAdapter(adapter);
-        ModularWatchFaceService.SETTINGS_MODE = 2;
+        ((DotsPageIndicator) findViewById(R.id.indicator))
+                .setPager((GridViewPager) findViewById(R.id.pager));
+    }
+
+    public void setSettingsMode(boolean mode) {
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        ModularWatchFaceService.SETTINGS_MODE = 2;
+        setSettingsMode(true);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        ModularWatchFaceService.SETTINGS_MODE = 1;
+        setSettingsMode(false);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        adapter.providerInfoRetriever.release();
+    public SettingsAdapter getAdapter() {
+        return null;
     }
 
     public ArrayList<SettingsOverlay> getSettingModuleOverlays(int row, int col) {
-        return adapter.getSettingModuleOverlays(row, col);
+        return getAdapter().getSettingModuleOverlays(row, col);
     }
 }

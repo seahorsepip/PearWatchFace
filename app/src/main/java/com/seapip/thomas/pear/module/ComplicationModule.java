@@ -1,4 +1,4 @@
-package com.seapip.thomas.pear;
+package com.seapip.thomas.pear.module;
 
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -13,6 +13,9 @@ import android.graphics.drawable.Icon;
 import android.support.wearable.complications.ComplicationData;
 import android.support.wearable.complications.ComplicationHelperActivity;
 import android.support.wearable.complications.ComplicationText;
+
+import com.seapip.thomas.pear.DrawableTools;
+import com.seapip.thomas.pear.ModularWatchFaceService;
 
 public class ComplicationModule implements Module {
     private Rect mBounds;
@@ -60,7 +63,6 @@ public class ComplicationModule implements Module {
         mShortTextTextPaint.setTextAlign(Paint.Align.CENTER);
         mLongTextTitlePaint = new Paint();
         mLongTextTitlePaint.setAntiAlias(true);
-        mLongTextTitlePaint.setColor(Color.WHITE);
         mLongTextTextPaint = new Paint();
         mLongTextTextPaint.setAntiAlias(true);
         mLongTextTextPaint.setColor(Color.WHITE);
@@ -71,10 +73,10 @@ public class ComplicationModule implements Module {
     @Override
     public void setBounds(Rect bounds) {
         mBounds = bounds;
-        mRangeCirclePaint.setStrokeWidth(Math.round(bounds.height() / 20));
-        mRangeArcPaint.setStrokeWidth(Math.round(bounds.height() / 20));
+        mRangeCirclePaint.setStrokeWidth(Math.round(bounds.height() * 0.05f));
+        mRangeArcPaint.setStrokeWidth(Math.round(bounds.height() * 0.05f));
         mRangeValuePaint.setTextSize(bounds.height() * 0.25f);
-        mShortTextTitlePaint.setTextSize(bounds.height() * 0.25f);
+        mShortTextTitlePaint.setTextSize(bounds.height() * 0.22f);
         mLongTextTitlePaint.setTextSize(bounds.height() * 0.35f);
         mLongTextTextPaint.setTextSize(bounds.height() * 0.30f);
     }
@@ -178,7 +180,8 @@ public class ComplicationModule implements Module {
         }
 
         String textString = text.getText(mContext, mCurrentTimeMillis).toString().toUpperCase();
-        mShortTextTextPaint.setTextSize(mBounds.height() * (0.60f - 0.06f * textString.length()));
+        mShortTextTextPaint.setTextSize(mBounds.height() *
+                (0.60f - 0.06f * (textString.length() == 1 ? 2 : textString.length())));
         canvas.drawText(textString,
                 mBounds.centerX(),
                 textY,

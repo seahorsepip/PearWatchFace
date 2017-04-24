@@ -1,4 +1,4 @@
-package com.seapip.thomas.pear;
+package com.seapip.thomas.pear.module;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;

@@ -1,10 +1,12 @@
-package com.seapip.thomas.pear;
+package com.seapip.thomas.pear.settings;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.wearable.view.DotsPageIndicator;
 import android.support.wearable.view.GridViewPager;
+
+import com.seapip.thomas.pear.R;
 
 import java.util.ArrayList;
 
@@ -26,10 +28,9 @@ public class SettingsActivity extends Activity {
         super.onResume();
         setSettingsMode(true);
     }
-
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
         setSettingsMode(false);
     }
 

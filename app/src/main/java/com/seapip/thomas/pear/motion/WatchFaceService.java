@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.seapip.thomas.pear;
+package com.seapip.thomas.pear.motion;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-public class MotionWatchFaceService extends CanvasWatchFaceService {
+public class WatchFaceService extends CanvasWatchFaceService {
 
     public static final int MODULE_SPACING = 10;
 
@@ -52,6 +52,8 @@ public class MotionWatchFaceService extends CanvasWatchFaceService {
     private static final int MSG_UPDATE_TIME = 0;
 
     public static int SETTINGS_MODE = 0;
+
+    public static boolean ROUND = false;
 
     private SharedPreferences mPrefs;
 
@@ -61,15 +63,15 @@ public class MotionWatchFaceService extends CanvasWatchFaceService {
     }
 
     private static class EngineHandler extends Handler {
-        private final WeakReference<MotionWatchFaceService.Engine> mWeakReference;
+        private final WeakReference<WatchFaceService.Engine> mWeakReference;
 
-        public EngineHandler(MotionWatchFaceService.Engine reference) {
+        public EngineHandler(WatchFaceService.Engine reference) {
             mWeakReference = new WeakReference<>(reference);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            MotionWatchFaceService.Engine engine = mWeakReference.get();
+            WatchFaceService.Engine engine = mWeakReference.get();
             if (engine != null) {
                 switch (msg.what) {
                     case MSG_UPDATE_TIME:
@@ -109,7 +111,7 @@ public class MotionWatchFaceService extends CanvasWatchFaceService {
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
 
-            setWatchFaceStyle(new WatchFaceStyle.Builder(MotionWatchFaceService.this)
+            setWatchFaceStyle(new WatchFaceStyle.Builder(WatchFaceService.this)
                     .setStatusBarGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL)
                     .setAcceptsTapEvents(true)
                     .build());
@@ -117,12 +119,13 @@ public class MotionWatchFaceService extends CanvasWatchFaceService {
             mCalendar = Calendar.getInstance();
             mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-            int scene = mPrefs.getInt("settings_scene", 0);
+            int date = mPrefs.getInt("settings_motion_date", 0);
+            int scene = mPrefs.getInt("settings_motion_scene", 0);
 
             mMotionModule = new MotionModule(getApplicationContext(), scene);
             mDigitalClockModule = new DigitalClockModule(mCalendar, true);
             mDigitalClockModule.setColor(Color.WHITE);
-            mDateModule = new DateModule(mCalendar);
+            mDateModule = new DateModule(mCalendar, date);
             mDateModule.setColor(Color.WHITE);
 
             mModules = new ArrayList<>();
@@ -166,6 +169,8 @@ public class MotionWatchFaceService extends CanvasWatchFaceService {
         public void onApplyWindowInsets(WindowInsets insets) {
             super.onApplyWindowInsets(insets);
             mIsRound = insets.isRound();
+            ROUND = mIsRound;
+            setBounds();
         }
 
         @Override
@@ -177,7 +182,7 @@ public class MotionWatchFaceService extends CanvasWatchFaceService {
         }
 
         private void setBounds() {
-            int inset = (mWidth - (int) Math.sqrt(mWidth * mWidth / 2)) / 2;
+            int inset = mIsRound ? (mWidth - (int) Math.sqrt(mWidth * mWidth / 2)) / 2 : MODULE_SPACING;
             if (SETTINGS_MODE == 3) {
                 inset += 20;
             }
@@ -192,7 +197,7 @@ public class MotionWatchFaceService extends CanvasWatchFaceService {
                     bounds.top + bounds.height() / 3 - MODULE_SPACING / 2)
             );
             mDateModule.setBounds(new Rect(
-                    bounds.left,
+                    bounds.left + MODULE_SPACING * 2,
                     bounds.top + bounds.height() / 3 - MODULE_SPACING / 2 * 3,
                     bounds.right,
                     bounds.bottom - (bounds.height() - MODULE_SPACING * 2) / 3 - 3 * MODULE_SPACING)
@@ -228,7 +233,9 @@ public class MotionWatchFaceService extends CanvasWatchFaceService {
                     break;
                 case 3:
                     setBounds();
-                    int scene = mPrefs.getInt("settings_scene", 0);
+                    int date = mPrefs.getInt("settings_motion_date", 0);
+                    int scene = mPrefs.getInt("settings_motion_scene", 0);
+                    mDateModule.setDate(date);
                     mMotionModule.setScene(scene);
                     SETTINGS_MODE = 2;
                     break;
@@ -264,7 +271,7 @@ public class MotionWatchFaceService extends CanvasWatchFaceService {
             }
             mRegisteredTimeZoneReceiver = true;
             IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
-            MotionWatchFaceService.this.registerReceiver(mTimeZoneReceiver, filter);
+            WatchFaceService.this.registerReceiver(mTimeZoneReceiver, filter);
         }
 
         private void unregisterReceiver() {
@@ -272,7 +279,7 @@ public class MotionWatchFaceService extends CanvasWatchFaceService {
                 return;
             }
             mRegisteredTimeZoneReceiver = false;
-            MotionWatchFaceService.this.unregisterReceiver(mTimeZoneReceiver);
+            WatchFaceService.this.unregisterReceiver(mTimeZoneReceiver);
         }
 
         /**

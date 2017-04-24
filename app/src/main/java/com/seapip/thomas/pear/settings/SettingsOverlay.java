@@ -1,4 +1,4 @@
-package com.seapip.thomas.pear;
+package com.seapip.thomas.pear.settings;
 
 import android.content.Intent;
 import android.graphics.Canvas;
@@ -8,12 +8,14 @@ import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Typeface;
-
-import java.util.concurrent.Callable;
+import android.text.TextPaint;
+import android.text.TextUtils;
 
 public class SettingsOverlay {
     private Rect mBounds;
+    private Rect mScreenBounds;
     private String mTitle;
     private Paint.Align mAlign;
     private Intent mIntent;
@@ -21,6 +23,7 @@ public class SettingsOverlay {
     private int mRequestCode;
     private boolean mActive;
     private boolean mRound;
+    private boolean mInsetTitle;
 
     /* Colors */
     private int mColor;
@@ -32,21 +35,23 @@ public class SettingsOverlay {
     /* Paint */
     private Paint mBoxPaint;
     private Paint mOverlayRemovePaint;
-    private Paint mTitleTextPaint;
+    private TextPaint mTitleTextPaint;
     private Paint mTitlePaint;
 
     /* Path */
     private Path mBoxPath;
     private Path mTitlePath;
 
-    public SettingsOverlay(Rect bounds, String title, Paint.Align align, Intent intent, int requestCode) {
-        this(bounds, title, align);
+    public SettingsOverlay(Rect bounds, Rect screenBounds, String title, Paint.Align align,
+                           Intent intent, int requestCode) {
+        this(bounds, screenBounds, title, align);
         mIntent = intent;
         mRequestCode = requestCode;
     }
 
-    public SettingsOverlay(Rect bounds, String title, Paint.Align align) {
+    public SettingsOverlay(Rect bounds, Rect screenbounds, String title, Paint.Align align) {
         mBounds = bounds;
+        mScreenBounds = screenbounds;
         mAlign = align;
 
         /* Colors */
@@ -65,7 +70,7 @@ public class SettingsOverlay {
         mOverlayRemovePaint = new Paint();
         mOverlayRemovePaint.setAntiAlias(true);
         mOverlayRemovePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-        mTitleTextPaint = new Paint();
+        mTitleTextPaint = new TextPaint();
         mTitleTextPaint.setColor(Color.BLACK);
         mTitleTextPaint.setTypeface(mFontBold);
         mTitleTextPaint.setTextSize(18);
@@ -93,11 +98,20 @@ public class SettingsOverlay {
         }
         if (mActive && mTitle != null) {
             canvas.drawPath(mTitlePath, mTitlePaint);
+            RectF titleRect = new RectF();
+            mTitlePath.computeBounds(titleRect, false);
+            float textX = titleRect.centerX();
+            switch (mAlign) {
+                case LEFT:
+                    textX = titleRect.left + 8;
+                    break;
+                case RIGHT:
+                    textX = titleRect.right - 8;
+                    break;
+            }
             canvas.drawText(mTitle.toUpperCase(),
-                    mAlign == Paint.Align.LEFT ? mBounds.left + 7 :
-                            mAlign == Paint.Align.CENTER ? mBounds.centerX() - 1 :
-                                    mBounds.right - 7,
-                    mBounds.top - 18 - (mTitleTextPaint.descent() + mTitleTextPaint.ascent()) / 2,
+                    textX,
+                    titleRect.centerY() - (mTitleTextPaint.descent() + mTitleTextPaint.ascent()) / 2,
                     mTitleTextPaint);
         }
     }
@@ -108,17 +122,31 @@ public class SettingsOverlay {
 
     public void setTitle(String title) {
         mTitle = title;
-        Rect titleRect = new Rect(mBounds.left - 1,
+        int width = (int) mTitleTextPaint.measureText(title.toUpperCase());
+        if(width > mScreenBounds.width()) {
+            width = mScreenBounds.width() - 14;
+            mTitle = TextUtils.ellipsize(title, mTitleTextPaint, width - 38, TextUtils.TruncateAt.END).toString();
+        }
+        Rect titleRect = new Rect(mBounds.centerX() - width / 2 - 8,
                 mBounds.top - 30,
-                mBounds.left + (int) mTitleTextPaint.measureText(title.toUpperCase()) + 16,
+                mBounds.centerX() + width / 2 + 8,
                 mBounds.top - 6);
-        int width = titleRect.width();
-        if (mAlign == Paint.Align.CENTER) {
-            titleRect.left += mBounds.width() / 2 - width / 2;
-            titleRect.right += mBounds.width() / 2 - width / 2;
-        } else if (mAlign == Paint.Align.RIGHT) {
-            titleRect.left += mBounds.width() - width + 1;
-            titleRect.right += mBounds.width() - width + 1;
+        switch (mAlign) {
+            case LEFT:
+                titleRect.left = mBounds.left - 1;
+                titleRect.right = mBounds.left + width - 1 + 16;
+                break;
+            case RIGHT:
+                titleRect.left = mBounds.right - width + 1 - 16;
+                titleRect.right = mBounds.right + 1;
+                break;
+        }
+        if (mRound && mInsetTitle) {
+            titleRect.top = mBounds.bottom - 50;
+            titleRect.bottom = mBounds.bottom - 26;
+        } else if (mInsetTitle) {
+            titleRect.top = mBounds.bottom - 30;
+            titleRect.bottom = mBounds.bottom - 6;
         }
         mTitlePath = roundedRect(titleRect, 4);
     }
@@ -134,6 +162,11 @@ public class SettingsOverlay {
 
     public void setRound(boolean round) {
         mRound = round;
+    }
+
+    public void setInsetTitle(boolean insetTitle) {
+        mInsetTitle = insetTitle;
+        setTitle(mTitle);
     }
 
     public Intent getIntent() {

@@ -28,7 +28,7 @@
             android:required="false" />
 
         <service
-            android:name=".ModularWatchFaceService"
+            android:name=".modular.WatchFaceService"
             android:label="@string/name_modular"
             android:permission="android.permission.BIND_WALLPAPER">
             <meta-data
@@ -52,7 +52,7 @@
         </service>
 
         <service
-            android:name=".MotionWatchFaceService"
+            android:name=".motion.WatchFaceService"
             android:label="@string/name_motion"
             android:permission="android.permission.BIND_WALLPAPER">
             <meta-data
@@ -93,7 +93,7 @@
         </service>
 
         <activity
-            android:name=".ModularSettingsActivity"
+            android:name=".modular.SettingsActivity"
             android:label="Settings"
             android:theme="@style/Theme.Transparent">
             <intent-filter>
@@ -105,7 +105,7 @@
         </activity>
 
         <activity
-            android:name=".MotionSettingsActivity"
+            android:name=".motion.SettingsActivity"
             android:label="Settings"
             android:theme="@style/Theme.Transparent">
             <intent-filter>

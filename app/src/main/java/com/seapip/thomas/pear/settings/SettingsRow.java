@@ -1,4 +1,4 @@
-package com.seapip.thomas.pear;
+package com.seapip.thomas.pear.settings;
 
 import java.util.ArrayList;
 

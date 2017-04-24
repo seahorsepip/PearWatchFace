@@ -1,4 +1,4 @@
-package com.seapip.thomas.pear;
+package com.seapip.thomas.pear.settings;
 
 import android.app.Fragment;
 import android.content.Intent;
@@ -15,6 +15,8 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.seapip.thomas.pear.modular.WatchFaceService;
 
 import java.util.ArrayList;
 
@@ -92,14 +94,14 @@ public class SettingsFragment extends Fragment implements View.OnTouchListener {
             switch (requestCode) {
                 case COLOR_REQUEST:
                     title = data.getStringExtra("color_name");
-                    editor.putString("settings_color_name", title);
-                    editor.putInt("settings_color_value", data.getIntExtra("color_value", 0));
+                    editor.putString("settings_modular_color_name", title);
+                    editor.putInt("settings_modular_color_value", data.getIntExtra("color_value", 0));
                     editor.apply();
                     getSettingModuleOverlays().get(0).setTitle(title);
                     updateSettings();
                     break;
                 default:
-                    for (int id : ModularWatchFaceService.COMPLICATION_IDS) {
+                    for (int id : WatchFaceService.COMPLICATION_IDS) {
                         if (id == requestCode) {
                             title = "OFF";
                             if (data != null) {

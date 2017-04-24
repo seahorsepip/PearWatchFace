@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.seapip.thomas.pear;
+package com.seapip.thomas.pear.modular;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -45,7 +45,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-public class ModularWatchFaceService extends CanvasWatchFaceService {
+public class WatchFaceService extends CanvasWatchFaceService {
 
     public static final int[][] COMPLICATION_SUPPORTED_TYPES = {
             {ComplicationData.TYPE_RANGED_VALUE, ComplicationData.TYPE_SHORT_TEXT, ComplicationData.TYPE_SMALL_IMAGE, ComplicationData.TYPE_ICON},
@@ -73,6 +73,8 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
 
     public static int SETTINGS_MODE = 0;
 
+    public static boolean ROUND = false;
+
     private SharedPreferences mPrefs;
 
     @Override
@@ -81,15 +83,15 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
     }
 
     private static class EngineHandler extends Handler {
-        private final WeakReference<ModularWatchFaceService.Engine> mWeakReference;
+        private final WeakReference<WatchFaceService.Engine> mWeakReference;
 
-        public EngineHandler(ModularWatchFaceService.Engine reference) {
+        public EngineHandler(WatchFaceService.Engine reference) {
             mWeakReference = new WeakReference<>(reference);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            ModularWatchFaceService.Engine engine = mWeakReference.get();
+            WatchFaceService.Engine engine = mWeakReference.get();
             if (engine != null) {
                 switch (msg.what) {
                     case MSG_UPDATE_TIME:
@@ -132,7 +134,7 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
 
-            setWatchFaceStyle(new WatchFaceStyle.Builder(ModularWatchFaceService.this)
+            setWatchFaceStyle(new WatchFaceStyle.Builder(WatchFaceService.this)
                     .setStatusBarGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL)
                     .setAcceptsTapEvents(true)
                     .build());
@@ -157,7 +159,7 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
             mModules.add(mBottomRightComplicationModule);
             mModules.add(mDigitalClockModule);
 
-            int color = mPrefs.getInt("settings_color_value",
+            int color = mPrefs.getInt("settings_modular_color_value",
                     Color.parseColor("#18FFFF"));
             for (Module module : mModules) {
                 module.setColor(color);
@@ -207,6 +209,8 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
         public void onApplyWindowInsets(WindowInsets insets) {
             super.onApplyWindowInsets(insets);
             mIsRound = insets.isRound();
+            ROUND = mIsRound;
+            setBounds();
         }
 
         @Override
@@ -218,7 +222,7 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
         }
 
         private void setBounds() {
-            int inset = (mWidth - (int) Math.sqrt(mWidth * mWidth / 2)) / 2;
+            int inset = mIsRound ? (mWidth - (int) Math.sqrt(mWidth * mWidth / 2)) / 2 : MODULE_SPACING;
             if (SETTINGS_MODE == 3) {
                 inset += 20;
             }
@@ -303,7 +307,7 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
                     SETTINGS_MODE = 0;
                     break;
                 case 3:
-                    int color = mPrefs.getInt("settings_color_value", Color.parseColor("#18FFFF"));
+                    int color = mPrefs.getInt("settings_modular_color_value", Color.parseColor("#18FFFF"));
                     for (Module module : mModules) {
                         module.setColor(color);
                     }
@@ -344,7 +348,7 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
             }
             mRegisteredTimeZoneReceiver = true;
             IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
-            ModularWatchFaceService.this.registerReceiver(mTimeZoneReceiver, filter);
+            WatchFaceService.this.registerReceiver(mTimeZoneReceiver, filter);
         }
 
         private void unregisterReceiver() {
@@ -352,7 +356,7 @@ public class ModularWatchFaceService extends CanvasWatchFaceService {
                 return;
             }
             mRegisteredTimeZoneReceiver = false;
-            ModularWatchFaceService.this.unregisterReceiver(mTimeZoneReceiver);
+            WatchFaceService.this.unregisterReceiver(mTimeZoneReceiver);
         }
 
         /**

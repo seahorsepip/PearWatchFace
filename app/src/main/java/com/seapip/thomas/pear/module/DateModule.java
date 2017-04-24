@@ -11,6 +11,7 @@ import java.util.Locale;
 public class DateModule implements Module {
     private Rect mBounds;
     private Calendar mCalendar;
+    private int mDate;
     private boolean mAmbient;
 
     /* Fonts */
@@ -19,8 +20,9 @@ public class DateModule implements Module {
     /* Paint */
     private Paint mTextPaint;
 
-    public DateModule(Calendar calendar) {
+    public DateModule(Calendar calendar, int date) {
         mCalendar = calendar;
+        mDate = date;
 
         /* Fonts */
         mFontLight = Typeface.create("sans-serif-light", Typeface.NORMAL);
@@ -43,8 +45,18 @@ public class DateModule implements Module {
     public void draw(Canvas canvas) {
         String dayOfWeek = mCalendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.getDefault());
         String dayOfMonth = String.valueOf(mCalendar.get(Calendar.DAY_OF_MONTH));
+        String month = mCalendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
+        String date = "";
+        switch (mDate) {
+            case 0:
+                date = dayOfWeek;
+                break;
+            case 1:
+                date = month;
+                break;
+        }
 
-        canvas.drawText(dayOfWeek.toUpperCase() + " " + dayOfMonth,
+        canvas.drawText(date.toUpperCase() + " " + dayOfMonth,
                 mBounds.right - mBounds.height() * 0.05f,
                 mBounds.centerY() - (mTextPaint.descent() + mTextPaint.ascent()) / 2,
                 mTextPaint);
@@ -54,6 +66,10 @@ public class DateModule implements Module {
     public void setColor(int color) {
         mTextPaint.setColor(color);
         mTextPaint.setAlpha(192);
+    }
+
+    public void setDate(int date) {
+        mDate = date;
     }
 
     @Override

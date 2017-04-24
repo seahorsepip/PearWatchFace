@@ -39,12 +39,13 @@ public class MotionModule implements Module {
         mRandom = new Random();
         mLastRandom = 0;
 
-        int[] jellyfish = new int[5];
+        int[] jellyfish = new int[6];
         jellyfish[0] = R.drawable.jellyfish_1;
         jellyfish[1] = R.drawable.jellyfish_2;
         jellyfish[2] = R.drawable.jellyfish_3;
         jellyfish[3] = R.drawable.jellyfish_4;
         jellyfish[4] = R.drawable.jellyfish_5;
+        jellyfish[5] = R.drawable.jellyfish_6;
 
         int[] flower = new int[5];
         flower[0] = R.drawable.flower1;
@@ -83,8 +84,8 @@ public class MotionModule implements Module {
                 }
                 mPosition += mStep;
                 int alpha = mFadeInPaint.getAlpha() - 8;
-                if (alpha < 128) {
-                    alpha = 128;
+                if (alpha < 92) {
+                    alpha = 92;
                 }
                 mFadeInPaint.setAlpha(alpha);
                 mMovie.draw(mCanvas, 0, 0);

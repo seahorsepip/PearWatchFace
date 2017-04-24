@@ -81,7 +81,7 @@ public class ColorActivity extends PreferenceActivity {
                     }
                 });
                 preference.setTitle(name);
-                setStyleIcon(preference, getContext().getDrawable(R.drawable.config_icon).mutate(), color);
+                setStyleIcon(preference, getContext().getDrawable(R.drawable.ic_circle_black_24dp).mutate(), color);
 
                 getPreferenceScreen().addPreference(preference);
 

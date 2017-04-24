@@ -15,7 +15,7 @@ import android.support.wearable.complications.ComplicationHelperActivity;
 import android.support.wearable.complications.ComplicationText;
 
 import com.seapip.thomas.pear.DrawableTools;
-import com.seapip.thomas.pear.ModularWatchFaceService;
+import com.seapip.thomas.pear.modular.WatchFaceService;
 
 public class ComplicationModule implements Module {
     private Rect mBounds;
@@ -294,7 +294,7 @@ public class ComplicationModule implements Module {
         PendingIntent intent = mComplicationData.getTapAction();
         if (mComplicationData.getType() == ComplicationData.TYPE_NO_PERMISSION) {
             ComponentName componentName = new ComponentName(
-                    mContext, ModularWatchFaceService.class);
+                    mContext, WatchFaceService.class);
             Intent permissionRequestIntent =
                     ComplicationHelperActivity.createPermissionRequestHelperIntent(
                             mContext, componentName);

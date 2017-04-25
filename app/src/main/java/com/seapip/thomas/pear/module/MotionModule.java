@@ -47,16 +47,26 @@ public class MotionModule implements Module {
         jellyfish[4] = R.drawable.jellyfish_5;
         jellyfish[5] = R.drawable.jellyfish_6;
 
-        int[] flower = new int[5];
-        flower[0] = R.drawable.flower1;
-        flower[1] = R.drawable.flower2;
-        flower[2] = R.drawable.flower3;
-        flower[3] = R.drawable.flower4;
-        flower[4] = R.drawable.flower5;
+        int[] flower = new int[7];
+        flower[0] = R.drawable.flower_1;
+        flower[1] = R.drawable.flower_2;
+        flower[2] = R.drawable.flower_3;
+        flower[3] = R.drawable.flower_4;
+        flower[4] = R.drawable.flower_5;
+        flower[5] = R.drawable.flower_6;
+        flower[6] = R.drawable.flower_7;
 
-        mMovies = new int[2][];
+        int[] city = new int[5];
+        city[0] = R.drawable.city_1;
+        city[1] = R.drawable.city_2;
+        city[2] = R.drawable.city_3;
+        city[3] = R.drawable.city_4;
+        city[4] = R.drawable.city_5;
+
+        mMovies = new int[4][];
         mMovies[0] = jellyfish;
         mMovies[1] = flower;
+        mMovies[2] = city;
 
         /* Paint */
         mFadeInPaint = new Paint();
@@ -137,6 +147,8 @@ public class MotionModule implements Module {
         mAmbient = ambient;
         if (!ambient) {
             start();
+        } else {
+            mFadeInPaint.setAlpha(255);
         }
     }
 

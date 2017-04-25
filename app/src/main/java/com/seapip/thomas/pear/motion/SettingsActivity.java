@@ -43,16 +43,19 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                 switch (date) {
                     default:
                     case 0:
-                        dateTitle = "Day of week";
+                        dateTitle = "Off";
                         break;
                     case 1:
-                        dateTitle = "Day of month";
+                        dateTitle = "Day of week";
                         break;
                     case 2:
+                        dateTitle = "Day of month";
+                        break;
+                    case 3:
                         dateTitle = "Day";
                         break;
                 }
-                final SettingsOverlay dateOverlay = new SettingsOverlay(new Rect(
+                final SettingsOverlay dateModuleOverlay = new SettingsOverlay(new Rect(
                         bounds.left + WatchFaceService.MODULE_SPACING * 2,
                         bounds.top + bounds.height() / 3 - WatchFaceService.MODULE_SPACING / 2 * 3,
                         bounds.right,
@@ -60,30 +63,33 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                         bounds,
                         dateTitle,
                         Paint.Align.RIGHT);
-                dateOverlay.setRunnable(new Runnable() {
+                dateModuleOverlay.setRunnable(new Runnable() {
                     @Override
                     public void run() {
                         int date = preferences.getInt("settings_motion_date", 0);
                         date++;
-                        date = date > 2 ? 0 : date;
+                        date = date > 3 ? 0 : date;
                         preferences.edit().putInt("settings_motion_date", date).apply();
                         switch (date) {
                             default:
                             case 0:
-                                dateOverlay.setTitle("Day of week");
+                                dateModuleOverlay.setTitle("Off");
                                 break;
                             case 1:
-                                dateOverlay.setTitle("Day of month");
+                                dateModuleOverlay.setTitle("Day of week");
                                 break;
                             case 2:
-                                dateOverlay.setTitle("Day");
+                                dateModuleOverlay.setTitle("Day of month");
+                                break;
+                            case 3:
+                                dateModuleOverlay.setTitle("Day");
                                 break;
                         }
                         setSettingsMode(true);
                     }
                 });
-                dateOverlay.setActive(true);
-                dateModules.add(dateOverlay);
+                dateModuleOverlay.setActive(true);
+                dateModules.add(dateModuleOverlay);
 
                 ArrayList<SettingsOverlay> backgroundModules = new ArrayList<>();
                 int scene = preferences.getInt("settings_motion_scene", 0);
@@ -96,8 +102,11 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                     case 1:
                         sceneTitle = "Flowers";
                         break;
+                    case 2:
+                        sceneTitle = "Cities";
+                        break;
                 }
-                final SettingsOverlay backgroundOverlay = new SettingsOverlay(screenBounds,
+                final SettingsOverlay backgroundModuleOverlay = new SettingsOverlay(screenBounds,
                         screenBounds,
                         sceneTitle,
                         Paint.Align.CENTER);
@@ -106,24 +115,27 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                     public void run() {
                         int scene = preferences.getInt("settings_motion_scene", 0);
                         scene++;
-                        scene = scene > 1 ? 0 : scene;
+                        scene = scene > 2 ? 0 : scene;
                         preferences.edit().putInt("settings_motion_scene", scene).apply();
                         switch (scene) {
                             case 0:
-                                backgroundOverlay.setTitle("Jellyfish");
+                                backgroundModuleOverlay.setTitle("Jellyfish");
                                 break;
                             case 1:
-                                backgroundOverlay.setTitle("Flowers");
+                                backgroundModuleOverlay.setTitle("Flowers");
+                                break;
+                            case 2:
+                                backgroundModuleOverlay.setTitle("Cities");
                                 break;
                         }
                         setSettingsMode(true);
                     }
                 };
-                backgroundOverlay.setRunnable(sceneRunnable);
-                backgroundOverlay.setRound(WatchFaceService.ROUND);
-                backgroundOverlay.setInsetTitle(true);
-                backgroundOverlay.setActive(true);
-                backgroundModules.add(backgroundOverlay);
+                backgroundModuleOverlay.setRunnable(sceneRunnable);
+                backgroundModuleOverlay.setRound(WatchFaceService.ROUND);
+                backgroundModuleOverlay.setInsetTitle(true);
+                backgroundModuleOverlay.setActive(true);
+                backgroundModules.add(backgroundModuleOverlay);
 
                 SettingsRow row = new SettingsRow();
                 row.addPages(new SettingsPage(dateModules));

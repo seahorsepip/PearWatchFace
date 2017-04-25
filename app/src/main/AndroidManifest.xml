@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.permission.PROVIDE_BACKGROUND" />
     <uses-permission android:name="com.google.android.wearable.permission.RECEIVE_COMPLICATION_DATA" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -42,7 +43,7 @@
                 android:resource="@drawable/preview_digital_circular" />
             <meta-data
                 android:name="com.google.android.wearable.watchface.wearableConfigurationAction"
-                android:value="com.example.android.wearable.watchface.CONFIG_MODULAR_WATCH_FACE" />
+                android:value="com.seapip.thomas.pear_watchface.modular.CONFIG" />
 
             <intent-filter>
                 <action android:name="android.service.wallpaper.WallpaperService" />
@@ -66,7 +67,31 @@
                 android:resource="@drawable/preview_digital_circular" />
             <meta-data
                 android:name="com.google.android.wearable.watchface.wearableConfigurationAction"
-                android:value="com.example.android.wearable.watchface.CONFIG_ANIMATION_WATCH_FACE" />
+                android:value="com.seapip.thomas.pear_watchface.motion.CONFIG" />
+
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+
+                <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".color.WatchFaceService"
+            android:label="@string/name_color"
+            android:permission="android.permission.BIND_WALLPAPER">
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/watch_face" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview"
+                android:resource="@drawable/preview_digital" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview_circular"
+                android:resource="@drawable/preview_digital_circular" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.wearableConfigurationAction"
+                android:value="com.seapip.thomas.pear_watchface.color.CONFIG" />
 
             <intent-filter>
                 <action android:name="android.service.wallpaper.WallpaperService" />
@@ -81,15 +106,15 @@
             android:label="Date"
             android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
             <intent-filter>
-                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST"/>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
             </intent-filter>
 
             <meta-data
                 android:name="android.support.wearable.complications.SUPPORTED_TYPES"
-                android:value="SHORT_TEXT,LONG_TEXT"/>
+                android:value="SHORT_TEXT,LONG_TEXT" />
             <meta-data
                 android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
-                android:value="600"/>
+                android:value="600" />
         </service>
 
         <activity
@@ -97,7 +122,7 @@
             android:label="Settings"
             android:theme="@style/Theme.Transparent">
             <intent-filter>
-                <action android:name="com.example.android.wearable.watchface.CONFIG_MODULAR_WATCH_FACE" />
+                <action android:name="com.seapip.thomas.pear_watchface.modular.CONFIG" />
 
                 <category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -109,7 +134,20 @@
             android:label="Settings"
             android:theme="@style/Theme.Transparent">
             <intent-filter>
-                <action android:name="com.example.android.wearable.watchface.CONFIG_ANIMATION_WATCH_FACE" />
+                <action android:name="com.seapip.thomas.pear_watchface.motion.CONFIG" />
+
+                <category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+
+        <activity
+            android:name=".color.SettingsActivity"
+            android:label="Settings"
+            android:theme="@style/Theme.Transparent">
+            <intent-filter>
+                <action android:name="com.seapip.thomas.pear_watchface.color.CONFIG" />
 
                 <category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />

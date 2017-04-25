@@ -35,7 +35,7 @@ import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
 import com.seapip.thomas.pear.module.MotionModule;
-import com.seapip.thomas.pear.module.DateModule;
+import com.seapip.thomas.pear.module.MotionDateModule;
 import com.seapip.thomas.pear.module.DigitalClockModule;
 import com.seapip.thomas.pear.module.Module;
 
@@ -105,7 +105,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
         private ArrayList<Module> mModules;
         private MotionModule mMotionModule;
         private DigitalClockModule mDigitalClockModule;
-        private DateModule mDateModule;
+        private MotionDateModule mMotionDateModule;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -125,13 +125,13 @@ public class WatchFaceService extends CanvasWatchFaceService {
             mMotionModule = new MotionModule(getApplicationContext(), scene);
             mDigitalClockModule = new DigitalClockModule(mCalendar, true);
             mDigitalClockModule.setColor(Color.WHITE);
-            mDateModule = new DateModule(mCalendar, date);
-            mDateModule.setColor(Color.WHITE);
+            mMotionDateModule = new MotionDateModule(mCalendar, date);
+            mMotionDateModule.setColor(Color.WHITE);
 
             mModules = new ArrayList<>();
             mModules.add(mMotionModule);
             mModules.add(mDigitalClockModule);
-            mModules.add(mDateModule);
+            mModules.add(mMotionDateModule);
         }
 
         @Override
@@ -196,7 +196,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     bounds.right,
                     bounds.top + bounds.height() / 3 - MODULE_SPACING / 2)
             );
-            mDateModule.setBounds(new Rect(
+            mMotionDateModule.setBounds(new Rect(
                     bounds.left + MODULE_SPACING * 2,
                     bounds.top + bounds.height() / 3 - MODULE_SPACING / 2 * 3,
                     bounds.right,
@@ -235,7 +235,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     setBounds();
                     int date = mPrefs.getInt("settings_motion_date", 0);
                     int scene = mPrefs.getInt("settings_motion_scene", 0);
-                    mDateModule.setDate(date);
+                    mMotionDateModule.setDate(date);
                     mMotionModule.setScene(scene);
                     SETTINGS_MODE = 2;
                     break;
@@ -255,11 +255,11 @@ public class WatchFaceService extends CanvasWatchFaceService {
                 registerReceiver();
                 /* Update time zone in case it changed while we weren't visible. */
                 mCalendar.setTimeZone(TimeZone.getDefault());
-                mMotionModule.setAmbient(mAmbient);
                 invalidate();
             } else {
                 unregisterReceiver();
             }
+            mMotionModule.setAmbient(mAmbient);
 
             /* Check and trigger whether or not timer should be running (only in active mode). */
             updateTimer();

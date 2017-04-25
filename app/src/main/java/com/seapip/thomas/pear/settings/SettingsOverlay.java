@@ -20,6 +20,7 @@ public class SettingsOverlay {
     private Paint.Align mAlign;
     private Intent mIntent;
     private Runnable mRunnable;
+    private Intent mData;
     private int mRequestCode;
     private boolean mActive;
     private boolean mRound;
@@ -42,17 +43,11 @@ public class SettingsOverlay {
     private Path mBoxPath;
     private Path mTitlePath;
 
-    public SettingsOverlay(Rect bounds, Rect screenBounds, String title, Paint.Align align,
-                           Intent intent, int requestCode) {
-        this(bounds, screenBounds, title, align);
-        mIntent = intent;
-        mRequestCode = requestCode;
-    }
-
     public SettingsOverlay(Rect bounds, Rect screenbounds, String title, Paint.Align align) {
         mBounds = bounds;
         mScreenBounds = screenbounds;
         mAlign = align;
+        mRequestCode = this.hashCode();
 
         /* Colors */
         mColor = Color.argb(102, 255, 255, 255);
@@ -87,15 +82,8 @@ public class SettingsOverlay {
     }
 
     public void draw(Canvas canvas) {
-        if (mRound) {
-            canvas.drawCircle(mBounds.centerX(), mBounds.centerY(),
-                    mBounds.width() / 2, mOverlayRemovePaint);
-            canvas.drawCircle(mBounds.centerX(), mBounds.centerY(),
-                    mBounds.width() / 2, mBoxPaint);
-        } else {
-            canvas.drawPath(mBoxPath, mOverlayRemovePaint);
-            canvas.drawPath(mBoxPath, mBoxPaint);
-        }
+        canvas.drawPath(mBoxPath, mOverlayRemovePaint);
+        canvas.drawPath(mBoxPath, mBoxPaint);
         if (mActive && mTitle != null) {
             canvas.drawPath(mTitlePath, mTitlePaint);
             RectF titleRect = new RectF();
@@ -123,7 +111,7 @@ public class SettingsOverlay {
     public void setTitle(String title) {
         mTitle = title;
         int width = (int) mTitleTextPaint.measureText(title.toUpperCase());
-        if(width > mScreenBounds.width()) {
+        if (width > mScreenBounds.width()) {
             width = mScreenBounds.width() - 14;
             mTitle = TextUtils.ellipsize(title, mTitleTextPaint, width - 38, TextUtils.TruncateAt.END).toString();
         }
@@ -162,6 +150,11 @@ public class SettingsOverlay {
 
     public void setRound(boolean round) {
         mRound = round;
+        int radius = mBounds.width();
+        if(mBounds.height() < radius) {
+            radius = mBounds.height();
+        }
+        mBoxPath = roundedRect(mBounds, radius / 2);
     }
 
     public void setInsetTitle(boolean insetTitle) {
@@ -171,6 +164,18 @@ public class SettingsOverlay {
 
     public Intent getIntent() {
         return mIntent;
+    }
+
+    public void setIntent(Intent intent) {
+        mIntent = intent;
+    }
+
+    public Intent getData() {
+        return mData;
+    }
+
+    public void setData(Intent data) {
+        mData = data;
     }
 
     public Runnable getRunnable() {

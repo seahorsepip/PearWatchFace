@@ -19,7 +19,6 @@ import android.util.DisplayMetrics;
 import com.seapip.thomas.pear.ColorActivity;
 import com.seapip.thomas.pear.R;
 import com.seapip.thomas.pear.settings.SettingsAdapter;
-import com.seapip.thomas.pear.settings.SettingsFragment;
 import com.seapip.thomas.pear.settings.SettingsOverlay;
 import com.seapip.thomas.pear.settings.SettingsPage;
 import com.seapip.thomas.pear.settings.SettingsRow;
@@ -36,7 +35,6 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext().getApplicationContext());
         adapter = new SettingsAdapter(getFragmentManager()) {
             @Override
             public ArrayList<SettingsRow> initPages() {
@@ -46,104 +44,88 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                 int width = metrics.widthPixels;
                 int height = metrics.heightPixels;
                 int spacing = WatchFaceService.MODULE_SPACING - 2;
-                int inset = (WatchFaceService.ROUND ? (width - (int) Math.sqrt(width * width / 2)) / 2 : WatchFaceService.MODULE_SPACING) + 20;
+                int inset = (WatchFaceService.ROUND ?
+                        (width - (int) Math.sqrt(width * width / 2)) / 2 :
+                        WatchFaceService.MODULE_SPACING) + 20;
                 Rect bounds = new Rect(inset, inset, width - inset, height - inset);
 
-
-                Intent colorIntent = new Intent(getApplicationContext(), ColorActivity.class);
-                colorIntent.putExtra("color", preferences.getInt("settings_color_value",
-                        Color.parseColor("#18FFFF")));
-                colorIntent.putExtra("color_names_id", R.array.color_names);
-                colorIntent.putExtra("color_values_id", R.array.color_values);
                 ArrayList<SettingsOverlay> colorModules = new ArrayList<>();
-                SettingsOverlay colorModuleOverlay = new SettingsOverlay(bounds,
-                        bounds,
-                        preferences.getString("settings_modular_color_name", "Cyan"),
-                        Paint.Align.LEFT, colorIntent, SettingsFragment.COLOR_REQUEST);
-                colorModules.add(colorModuleOverlay);
-                colorModuleOverlay.setActive(true);
+                final SettingsOverlay colorOverlay = new SettingsOverlay(bounds, bounds, "",
+                        Paint.Align.LEFT);
+                setColorOverlay(colorOverlay,
+                        "settings_modular_color_name",
+                        "settings_modular_color_value",
+                        "Cyan",
+                        Color.parseColor("#00BCD4"));
+                colorOverlay.setActive(true);
+                colorModules.add(colorOverlay);
 
                 mComplicationModules = new ArrayList<>();
-                SettingsOverlay complicationTopLeftModuleOverlay = new SettingsOverlay(
+                SettingsOverlay complicationTopLefOverlay = new SettingsOverlay(
                         new Rect(bounds.left,
                                 bounds.top,
                                 bounds.left + (bounds.width() - spacing * 2) / 3,
                                 bounds.top + (bounds.height() - spacing * 2) / 3),
                         bounds,
-                        "OFF", Paint.Align.LEFT,
-                        ComplicationHelperActivity.createProviderChooserHelperIntent(
-                                getApplicationContext(),
-                                new ComponentName(getApplicationContext().getApplicationContext(),
-                                        WatchFaceService.class),
-                                WatchFaceService.COMPLICATION_IDS[0],
-                                WatchFaceService.COMPLICATION_SUPPORTED_TYPES[0]), 0
-                );
-                SettingsOverlay complicationCenterModuleOverlay = new SettingsOverlay(
+                        "OFF", Paint.Align.LEFT);
+                setComplicationOverlay(complicationTopLefOverlay,
+                        WatchFaceService.class,
+                        WatchFaceService.COMPLICATION_IDS[0],
+                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[0]);
+                SettingsOverlay complicationCenterOverlay = new SettingsOverlay(
                         new Rect(bounds.left,
                                 bounds.top + (bounds.height() - spacing * 2) / 3 + spacing,
                                 bounds.right,
                                 bounds.bottom - (bounds.height() - spacing * 2) / 3 - spacing),
                         bounds,
                         "OFF",
-                        Paint.Align.CENTER,
-                        ComplicationHelperActivity.createProviderChooserHelperIntent(
-                                getApplicationContext(),
-                                new ComponentName(getApplicationContext().getApplicationContext(),
-                                        WatchFaceService.class),
-                                WatchFaceService.COMPLICATION_IDS[1],
-                                WatchFaceService.COMPLICATION_SUPPORTED_TYPES[1]), 1
-                );
-                SettingsOverlay complicationBottomLeftModuleOverlay = new SettingsOverlay(
+                        Paint.Align.CENTER);
+                setComplicationOverlay(complicationCenterOverlay,
+                        WatchFaceService.class,
+                        WatchFaceService.COMPLICATION_IDS[1],
+                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[1]);
+                SettingsOverlay complicationBottomLeftOverlay = new SettingsOverlay(
                         new Rect(bounds.left,
                                 bounds.bottom - (bounds.height() - spacing * 2) / 3,
                                 bounds.left + (bounds.width() - spacing * 2) / 3,
                                 bounds.bottom),
                         bounds,
                         "OFF",
-                        Paint.Align.LEFT,
-                        ComplicationHelperActivity.createProviderChooserHelperIntent(
-                                getApplicationContext(),
-                                new ComponentName(getApplicationContext().getApplicationContext(),
-                                        WatchFaceService.class),
-                                WatchFaceService.COMPLICATION_IDS[2],
-                                WatchFaceService.COMPLICATION_SUPPORTED_TYPES[2]), 2
-                );
-                SettingsOverlay complicationBottomCenterModuleOverlay = new SettingsOverlay(
+                        Paint.Align.LEFT);
+                setComplicationOverlay(complicationBottomLeftOverlay,
+                        WatchFaceService.class,
+                        WatchFaceService.COMPLICATION_IDS[2],
+                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[2]);
+                SettingsOverlay complicationBottomCenterOverlay = new SettingsOverlay(
                         new Rect(bounds.left + (bounds.width() - spacing * 2) / 3 + spacing,
                                 bounds.bottom - (bounds.height() - spacing * 2) / 3,
                                 bounds.right - (bounds.width() - spacing * 2) / 3 - spacing,
                                 bounds.bottom),
                         bounds,
                         "OFF",
-                        Paint.Align.CENTER,
-                        ComplicationHelperActivity.createProviderChooserHelperIntent(
-                                getApplicationContext(),
-                                new ComponentName(getApplicationContext().getApplicationContext(),
-                                        WatchFaceService.class),
-                                WatchFaceService.COMPLICATION_IDS[3],
-                                WatchFaceService.COMPLICATION_SUPPORTED_TYPES[3]), 3
-                );
-                SettingsOverlay complicationBottomRightModuleOverlay = new SettingsOverlay(
+                        Paint.Align.CENTER);
+                setComplicationOverlay(complicationBottomCenterOverlay,
+                        WatchFaceService.class,
+                        WatchFaceService.COMPLICATION_IDS[3],
+                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[3]);
+                SettingsOverlay complicationBottomRightOverlay = new SettingsOverlay(
                         new Rect(bounds.right - (bounds.width() - spacing * 2) / 3,
                                 bounds.bottom - (bounds.height() - spacing * 2) / 3,
                                 bounds.right,
                                 bounds.bottom),
                         bounds,
                         "OFF",
-                        Paint.Align.RIGHT,
-                        ComplicationHelperActivity.createProviderChooserHelperIntent(
-                                getApplicationContext(),
-                                new ComponentName(getApplicationContext().getApplicationContext(),
-                                        WatchFaceService.class),
-                                WatchFaceService.COMPLICATION_IDS[4],
-                                WatchFaceService.COMPLICATION_SUPPORTED_TYPES[4]), 4
-                );
-                mComplicationModules.add(complicationTopLeftModuleOverlay);
-                mComplicationModules.add(complicationCenterModuleOverlay);
-                mComplicationModules.add(complicationBottomLeftModuleOverlay);
-                mComplicationModules.add(complicationBottomCenterModuleOverlay);
-                mComplicationModules.add(complicationBottomRightModuleOverlay);
-                complicationTopLeftModuleOverlay.setActive(true);
+                        Paint.Align.RIGHT);
+                setComplicationOverlay(complicationBottomRightOverlay,
+                        WatchFaceService.class,
+                        WatchFaceService.COMPLICATION_IDS[4],
+                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[4]);
+                mComplicationModules.add(complicationTopLefOverlay);
+                mComplicationModules.add(complicationCenterOverlay);
+                mComplicationModules.add(complicationBottomLeftOverlay);
+                mComplicationModules.add(complicationBottomCenterOverlay);
+                mComplicationModules.add(complicationBottomRightOverlay);
+                complicationTopLefOverlay.setActive(true);
 
                 SettingsRow row = new SettingsRow();
                 row.addPages(new SettingsPage(colorModules));

@@ -160,7 +160,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
             mModules.add(mDigitalClockModule);
 
             int color = mPrefs.getInt("settings_modular_color_value",
-                    Color.parseColor("#18FFFF"));
+                    Color.parseColor("#00BCD4"));
             for (Module module : mModules) {
                 module.setColor(color);
             }
@@ -307,7 +307,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     SETTINGS_MODE = 0;
                     break;
                 case 3:
-                    int color = mPrefs.getInt("settings_modular_color_value", Color.parseColor("#18FFFF"));
+                    int color = mPrefs.getInt("settings_modular_color_value", Color.parseColor("#00BCD4"));
                     for (Module module : mModules) {
                         module.setColor(color);
                     }

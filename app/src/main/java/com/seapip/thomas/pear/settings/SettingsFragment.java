@@ -9,14 +9,10 @@ import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.wearable.complications.ComplicationProviderInfo;
-import android.support.wearable.complications.ProviderChooserIntent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.seapip.thomas.pear.modular.WatchFaceService;
 
 import java.util.ArrayList;
 
@@ -89,33 +85,14 @@ public class SettingsFragment extends Fragment implements View.OnTouchListener {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            String title;
-            SharedPreferences.Editor editor = mPrefs.edit();
-            switch (requestCode) {
-                case COLOR_REQUEST:
-                    title = data.getStringExtra("color_name");
-                    editor.putString("settings_modular_color_name", title);
-                    editor.putInt("settings_modular_color_value", data.getIntExtra("color_value", 0));
-                    editor.apply();
-                    getSettingModuleOverlays().get(0).setTitle(title);
-                    updateSettings();
-                    break;
-                default:
-                    for (int id : WatchFaceService.COMPLICATION_IDS) {
-                        if (id == requestCode) {
-                            title = "OFF";
-                            if (data != null) {
-                                ComplicationProviderInfo providerInfo =
-                                        data.getParcelableExtra(ProviderChooserIntent.EXTRA_PROVIDER_INFO);
-                                if (providerInfo != null) {
-                                    title = providerInfo.providerName;
-                                }
-                            }
-                            getSettingModuleOverlays().get(requestCode).setTitle(title);
-                            return;
-                        }
+            for (SettingsOverlay moduleOverlay : getSettingModuleOverlays()) {
+                if(moduleOverlay.getRequestCode() == requestCode) {
+                    Runnable runnable = moduleOverlay.getRunnable();
+                    if(runnable != null) {
+                        moduleOverlay.setData(data);
+                        runnable.run();
                     }
-                    break;
+                }
             }
         }
     }

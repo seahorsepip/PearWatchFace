@@ -10,6 +10,7 @@ import android.util.DisplayMetrics;
 
 import com.seapip.thomas.pear.R;
 import com.seapip.thomas.pear.settings.SettingsAdapter;
+import com.seapip.thomas.pear.settings.SettingsFinish;
 import com.seapip.thomas.pear.settings.SettingsOverlay;
 import com.seapip.thomas.pear.settings.SettingsPage;
 import com.seapip.thomas.pear.settings.SettingsRow;
@@ -37,6 +38,52 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                 Rect screenBounds = new Rect(screenInset, screenInset, width - screenInset, height - screenInset);
                 Rect bounds = new Rect(inset, inset, width - inset, height - inset);
 
+                ArrayList<SettingsOverlay> backgroundModules = new ArrayList<>();
+                int scene = preferences.getInt("settings_motion_scene", 0);
+                String sceneTitle;
+                switch (scene) {
+                    default:
+                    case 0:
+                        sceneTitle = "Jellyfish";
+                        break;
+                    case 1:
+                        sceneTitle = "Flowers";
+                        break;
+                    case 2:
+                        sceneTitle = "Cities";
+                        break;
+                }
+                final SettingsOverlay backgroundOverlay = new SettingsOverlay(screenBounds,
+                        screenBounds,
+                        sceneTitle,
+                        Paint.Align.CENTER);
+                Runnable sceneRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        int scene = preferences.getInt("settings_motion_scene", 0);
+                        scene++;
+                        scene = scene > 2 ? 0 : scene;
+                        preferences.edit().putInt("settings_motion_scene", scene).apply();
+                        switch (scene) {
+                            case 0:
+                                backgroundOverlay.setTitle("Jellyfish");
+                                break;
+                            case 1:
+                                backgroundOverlay.setTitle("Flowers");
+                                break;
+                            case 2:
+                                backgroundOverlay.setTitle("Cities");
+                                break;
+                        }
+                        setSettingsMode(true);
+                    }
+                };
+                backgroundOverlay.setRunnable(sceneRunnable);
+                backgroundOverlay.setRound(WatchFaceService.ROUND);
+                backgroundOverlay.setInsetTitle(true);
+                backgroundOverlay.setActive(true);
+                backgroundModules.add(backgroundOverlay);
+
                 ArrayList<SettingsOverlay> dateModules = new ArrayList<>();
                 int date = preferences.getInt("settings_motion_date", 0);
                 String dateTitle;
@@ -55,7 +102,7 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                         dateTitle = "Day";
                         break;
                 }
-                final SettingsOverlay dateModuleOverlay = new SettingsOverlay(new Rect(
+                final SettingsOverlay dateOverlay = new SettingsOverlay(new Rect(
                         bounds.left + WatchFaceService.MODULE_SPACING * 2,
                         bounds.top + bounds.height() / 3 - WatchFaceService.MODULE_SPACING / 2 * 3,
                         bounds.right,
@@ -63,7 +110,7 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                         bounds,
                         dateTitle,
                         Paint.Align.RIGHT);
-                dateModuleOverlay.setRunnable(new Runnable() {
+                dateOverlay.setRunnable(new Runnable() {
                     @Override
                     public void run() {
                         int date = preferences.getInt("settings_motion_date", 0);
@@ -73,73 +120,40 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                         switch (date) {
                             default:
                             case 0:
-                                dateModuleOverlay.setTitle("Off");
+                                dateOverlay.setTitle("Off");
                                 break;
                             case 1:
-                                dateModuleOverlay.setTitle("Day of week");
+                                dateOverlay.setTitle("Day of week");
                                 break;
                             case 2:
-                                dateModuleOverlay.setTitle("Day of month");
+                                dateOverlay.setTitle("Day of month");
                                 break;
                             case 3:
-                                dateModuleOverlay.setTitle("Day");
+                                dateOverlay.setTitle("Day");
                                 break;
                         }
                         setSettingsMode(true);
                     }
                 });
-                dateModuleOverlay.setActive(true);
-                dateModules.add(dateModuleOverlay);
+                dateOverlay.setActive(true);
+                dateModules.add(dateOverlay);
 
-                ArrayList<SettingsOverlay> backgroundModules = new ArrayList<>();
-                int scene = preferences.getInt("settings_motion_scene", 0);
-                String sceneTitle;
-                switch (scene) {
-                    default:
-                    case 0:
-                        sceneTitle = "Jellyfish";
-                        break;
-                    case 1:
-                        sceneTitle = "Flowers";
-                        break;
-                    case 2:
-                        sceneTitle = "Cities";
-                        break;
-                }
-                final SettingsOverlay backgroundModuleOverlay = new SettingsOverlay(screenBounds,
-                        screenBounds,
-                        sceneTitle,
-                        Paint.Align.CENTER);
-                Runnable sceneRunnable = new Runnable() {
+                ArrayList<SettingsOverlay> finishModules = new ArrayList<>();
+                SettingsFinish finishOverlay = new SettingsFinish(getApplicationContext(),
+                        new Rect(0, 0, width, height));
+                finishOverlay.setRunnable(new Runnable() {
                     @Override
                     public void run() {
-                        int scene = preferences.getInt("settings_motion_scene", 0);
-                        scene++;
-                        scene = scene > 2 ? 0 : scene;
-                        preferences.edit().putInt("settings_motion_scene", scene).apply();
-                        switch (scene) {
-                            case 0:
-                                backgroundModuleOverlay.setTitle("Jellyfish");
-                                break;
-                            case 1:
-                                backgroundModuleOverlay.setTitle("Flowers");
-                                break;
-                            case 2:
-                                backgroundModuleOverlay.setTitle("Cities");
-                                break;
-                        }
-                        setSettingsMode(true);
+                        finish();
                     }
-                };
-                backgroundModuleOverlay.setRunnable(sceneRunnable);
-                backgroundModuleOverlay.setRound(WatchFaceService.ROUND);
-                backgroundModuleOverlay.setInsetTitle(true);
-                backgroundModuleOverlay.setActive(true);
-                backgroundModules.add(backgroundModuleOverlay);
+                });
+
+                finishModules.add(finishOverlay);
 
                 SettingsRow row = new SettingsRow();
-                row.addPages(new SettingsPage(dateModules));
                 row.addPages(new SettingsPage(backgroundModules));
+                row.addPages(new SettingsPage(dateModules));
+                row.addPages(new SettingsPage(finishModules));
                 pages.add(row);
 
                 return pages;

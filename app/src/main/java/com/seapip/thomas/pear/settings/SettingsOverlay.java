@@ -25,6 +25,8 @@ public class SettingsOverlay {
     private boolean mActive;
     private boolean mRound;
     private boolean mInsetTitle;
+    private boolean mBottomTitle;
+    private boolean mDisabled;
 
     /* Colors */
     private int mColor;
@@ -48,6 +50,7 @@ public class SettingsOverlay {
         mScreenBounds = screenbounds;
         mAlign = align;
         mRequestCode = this.hashCode();
+        mDisabled = false;
 
         /* Colors */
         mColor = Color.argb(102, 255, 255, 255);
@@ -82,29 +85,34 @@ public class SettingsOverlay {
     }
 
     public void draw(Canvas canvas) {
-        canvas.drawPath(mBoxPath, mOverlayRemovePaint);
-        canvas.drawPath(mBoxPath, mBoxPaint);
-        if (mActive && mTitle != null) {
-            canvas.drawPath(mTitlePath, mTitlePaint);
-            RectF titleRect = new RectF();
-            mTitlePath.computeBounds(titleRect, false);
-            float textX = titleRect.centerX();
-            switch (mAlign) {
-                case LEFT:
-                    textX = titleRect.left + 8;
-                    break;
-                case RIGHT:
-                    textX = titleRect.right - 8;
-                    break;
+        if(!mDisabled) {
+            canvas.drawPath(mBoxPath, mOverlayRemovePaint);
+            canvas.drawPath(mBoxPath, mBoxPaint);
+            if (mActive && mTitle != null) {
+                canvas.drawPath(mTitlePath, mTitlePaint);
+                RectF titleRect = new RectF();
+                mTitlePath.computeBounds(titleRect, false);
+                float textX = titleRect.centerX();
+                switch (mAlign) {
+                    case LEFT:
+                        textX = titleRect.left + 8;
+                        break;
+                    case RIGHT:
+                        textX = titleRect.right - 8;
+                        break;
+                }
+                canvas.drawText(mTitle.toUpperCase(),
+                        textX,
+                        titleRect.centerY() - (mTitleTextPaint.descent() + mTitleTextPaint.ascent()) / 2,
+                        mTitleTextPaint);
             }
-            canvas.drawText(mTitle.toUpperCase(),
-                    textX,
-                    titleRect.centerY() - (mTitleTextPaint.descent() + mTitleTextPaint.ascent()) / 2,
-                    mTitleTextPaint);
         }
     }
 
     public boolean contains(int x, int y) {
+        if(mDisabled) {
+            return false;
+        }
         return mBounds.contains(x, y);
     }
 
@@ -135,6 +143,9 @@ public class SettingsOverlay {
         } else if (mInsetTitle) {
             titleRect.top = mBounds.bottom - 30;
             titleRect.bottom = mBounds.bottom - 6;
+        } else if(mBottomTitle) {
+            titleRect.top = mBounds.bottom + 6;
+            titleRect.bottom = mBounds.bottom + 30;
         }
         mTitlePath = roundedRect(titleRect, 4);
     }
@@ -148,17 +159,28 @@ public class SettingsOverlay {
         mBoxPaint.setColor(active ? mActiveColor : mColor);
     }
 
+    public void setDisabled(boolean disabled) {
+        mDisabled = disabled;
+    }
+
     public void setRound(boolean round) {
-        mRound = round;
-        int radius = mBounds.width();
-        if(mBounds.height() < radius) {
-            radius = mBounds.height();
+        if(round) {
+            mRound = true;
+            int radius = mBounds.width();
+            if (mBounds.height() < radius) {
+                radius = mBounds.height();
+            }
+            mBoxPath = roundedRect(mBounds, radius / 2);
         }
-        mBoxPath = roundedRect(mBounds, radius / 2);
     }
 
     public void setInsetTitle(boolean insetTitle) {
         mInsetTitle = insetTitle;
+        setTitle(mTitle);
+    }
+
+    public void setBottomTitle(boolean bottomTitle) {
+        mBottomTitle = bottomTitle;
         setTitle(mTitle);
     }
 

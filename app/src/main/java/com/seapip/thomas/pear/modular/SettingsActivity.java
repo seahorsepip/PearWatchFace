@@ -19,6 +19,7 @@ import android.util.DisplayMetrics;
 import com.seapip.thomas.pear.ColorActivity;
 import com.seapip.thomas.pear.R;
 import com.seapip.thomas.pear.settings.SettingsAdapter;
+import com.seapip.thomas.pear.settings.SettingsFinish;
 import com.seapip.thomas.pear.settings.SettingsOverlay;
 import com.seapip.thomas.pear.settings.SettingsPage;
 import com.seapip.thomas.pear.settings.SettingsRow;
@@ -127,9 +128,22 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                 mComplicationModules.add(complicationBottomRightOverlay);
                 complicationTopLefOverlay.setActive(true);
 
+                ArrayList<SettingsOverlay> finishModules = new ArrayList<>();
+                SettingsFinish finishOverlay = new SettingsFinish(getApplicationContext(),
+                        new Rect(0, 0, width, height));
+                finishOverlay.setRunnable(new Runnable() {
+                    @Override
+                    public void run() {
+                        finish();
+                    }
+                });
+
+                finishModules.add(finishOverlay);
+
                 SettingsRow row = new SettingsRow();
                 row.addPages(new SettingsPage(colorModules));
                 row.addPages(new SettingsPage(mComplicationModules));
+                row.addPages(new SettingsPage(finishModules));
                 pages.add(row);
                 return pages;
             }

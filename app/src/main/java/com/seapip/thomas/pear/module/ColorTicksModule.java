@@ -39,7 +39,7 @@ public class ColorTicksModule implements Module {
     @Override
     public void draw(Canvas canvas) {
         float outerRadius = mBounds.width() / 2 - mTickPaint.getStrokeWidth();
-        float innerHourRadius = outerRadius - mBounds.width() * 0.14f + mTickPaint.getStrokeWidth();
+        float innerHourRadius = outerRadius - mBounds.width() * 0.13f + mTickPaint.getStrokeWidth();
         float innerMinuteRadius = outerRadius - mBounds.width() * 0.0001f;
         for (int i = 0; i < 60; i++) {
             float rot = (float) (i * Math.PI * 2 / 60);

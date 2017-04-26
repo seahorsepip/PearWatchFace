@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.seapip.thomas.pear.color;
+package com.seapip.thomas.pear.simple;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -37,9 +37,9 @@ import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
 import com.seapip.thomas.pear.module.ClockHandsModule;
-import com.seapip.thomas.pear.module.ColorTicksModule;
 import com.seapip.thomas.pear.module.ComplicationModule;
 import com.seapip.thomas.pear.module.Module;
+import com.seapip.thomas.pear.module.SimpleTicksModule;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -139,8 +139,11 @@ public class WatchFaceService extends CanvasWatchFaceService {
         private ComplicationModule mBottomComplicationModule;
         private ComplicationModule mBottomLeftComplicationModule;
         private ComplicationModule mBottomRightComplicationModule;
-        private ColorTicksModule mColorTicksModule;
+        private SimpleTicksModule mSimpleTicksModule;
         private ClockHandsModule mClockHandsModule;
+
+        /* Style */
+        private int mStyle;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -157,6 +160,8 @@ public class WatchFaceService extends CanvasWatchFaceService {
 
             setActiveComplications(COMPLICATION_IDS);
 
+            mStyle = mPrefs.getInt("settings_simple_style", 0);
+
             mTopComplicationModule = new ComplicationModule(getApplicationContext());
             mTopLeftComplicationModule = new ComplicationModule(getApplicationContext());
             mTopRightComplicationModule = new ComplicationModule(getApplicationContext());
@@ -165,7 +170,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
             mBottomComplicationModule = new ComplicationModule(getApplicationContext());
             mBottomLeftComplicationModule = new ComplicationModule(getApplicationContext());
             mBottomRightComplicationModule = new ComplicationModule(getApplicationContext());
-            mColorTicksModule = new ColorTicksModule();
+            mSimpleTicksModule = new SimpleTicksModule(mStyle);
             mClockHandsModule = new ClockHandsModule(mCalendar);
 
             mModules = new ArrayList<>();
@@ -177,15 +182,19 @@ public class WatchFaceService extends CanvasWatchFaceService {
             mModules.add(mBottomComplicationModule);
             mModules.add(mBottomLeftComplicationModule);
             mModules.add(mBottomRightComplicationModule);
-            mModules.add(mColorTicksModule);
+            mModules.add(mSimpleTicksModule);
             mModules.add(mClockHandsModule);
 
-            int color = mPrefs.getInt("settings_color_color_value", Color.parseColor("#00BCD4"));
-            int accentColor = mPrefs.getInt("settings_color_accent_color_value",
-                    Color.parseColor("#CDDC39"));
-            for (Module module : mModules) {
-                module.setColor(color);
+            int color = mPrefs.getInt("settings_simple_color_value", Color.parseColor("#00BCD4"));
+            int accentColor = mPrefs.getInt("settings_simple_accent_color_value",
+                    Color.parseColor("#00BCD4"));
+            for(Module module : mModules) {
+                module.setColor(Color.parseColor("#747474"));
             }
+            mTopComplicationModule.setColor(color);
+            mLeftComplicationModule.setColor(color);
+            mBottomComplicationModule.setColor(color);
+            mRightComplicationModule.setColor(color);
             mClockHandsModule.setColor(accentColor);
         }
 
@@ -246,12 +255,15 @@ public class WatchFaceService extends CanvasWatchFaceService {
         private void setBounds() {
             int inset = 10;
             if (SETTINGS_MODE == 3) {
-                inset += 20;
+                inset += (int) (mWidth * 0.07f);
             }
 
-            Rect bounds = new Rect(inset, inset, mWidth - inset, mHeight - inset);
             Rect screenBounds = new Rect(inset - 5, inset - 5,
                     mWidth - inset + 5, mHeight - inset + 5);
+            if (SETTINGS_MODE < 3) {
+                inset += mStyle == 4 ? (int) (mWidth * 0.07f) : 0;
+            }
+            Rect bounds = new Rect(inset, inset, mWidth - inset, mHeight - inset);
 
             int offset = (int) (bounds.height() * 0.18f);
             int size = (int) (bounds.width() * 0.20f);
@@ -287,7 +299,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     screenBounds.bottom - size,
                     screenBounds.right,
                     screenBounds.bottom));
-            mColorTicksModule.setBounds(bounds);
+            mSimpleTicksModule.setBounds(bounds);
             mClockHandsModule.setBounds(bounds);
         }
 
@@ -330,20 +342,25 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     SETTINGS_MODE = 0;
                     break;
                 case 3:
+                    mStyle = mPrefs.getInt("settings_simple_style", 0);
                     setBounds();
-                    int color = mPrefs.getInt("settings_color_color_value",
+                    int color = mPrefs.getInt("settings_simple_color_value", Color.parseColor("#00BCD4"));
+                    int accentColor = mPrefs.getInt("settings_simple_accent_color_value",
                             Color.parseColor("#00BCD4"));
-                    int accentColor = mPrefs.getInt("settings_color_accent_color_value",
-                            Color.parseColor("#CDDC39"));
-                    for (Module module : mModules) {
-                        module.setColor(color);
+                    for(Module module : mModules) {
+                        module.setColor(Color.parseColor("#747474"));
                     }
+                    mTopComplicationModule.setColor(color);
+                    mLeftComplicationModule.setColor(color);
+                    mBottomComplicationModule.setColor(color);
+                    mRightComplicationModule.setColor(color);
                     mClockHandsModule.setColor(accentColor);
+                    mSimpleTicksModule.setStyle(mStyle);
                     SETTINGS_MODE = 2;
                     break;
             }
 
-            if(SETTINGS_MODE > 1) {
+            if (SETTINGS_MODE > 1) {
                 mCalendar.set(Calendar.HOUR, 10);
                 mCalendar.set(Calendar.MINUTE, 10);
                 mCalendar.set(Calendar.SECOND, 30);

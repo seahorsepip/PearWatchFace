@@ -113,6 +113,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(WatchFaceService.this)
                     .setStatusBarGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL)
+                    .setViewProtectionMode(WatchFaceStyle.PROTECT_STATUS_BAR)
                     .setAcceptsTapEvents(true)
                     .build());
 

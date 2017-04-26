@@ -291,17 +291,20 @@ public class ComplicationModule implements Module {
     }
 
     public PendingIntent getTapAction() {
-        PendingIntent intent = mComplicationData.getTapAction();
-        if (mComplicationData.getType() == ComplicationData.TYPE_NO_PERMISSION) {
-            ComponentName componentName = new ComponentName(
-                    mContext, WatchFaceService.class);
-            Intent permissionRequestIntent =
-                    ComplicationHelperActivity.createPermissionRequestHelperIntent(
-                            mContext, componentName);
-            mContext.startActivity(permissionRequestIntent);
-        } else if (mComplicationData.getType() == ComplicationData.TYPE_RANGED_VALUE &&
-                intent == null) {
-            mRangeValue = !mRangeValue;
+        PendingIntent intent = null;
+        if(mComplicationData != null) {
+            intent = mComplicationData.getTapAction();
+            if (mComplicationData.getType() == ComplicationData.TYPE_NO_PERMISSION) {
+                ComponentName componentName = new ComponentName(
+                        mContext, WatchFaceService.class);
+                Intent permissionRequestIntent =
+                        ComplicationHelperActivity.createPermissionRequestHelperIntent(
+                                mContext, componentName);
+                mContext.startActivity(permissionRequestIntent);
+            } else if (mComplicationData.getType() == ComplicationData.TYPE_RANGED_VALUE &&
+                    intent == null) {
+                mRangeValue = !mRangeValue;
+            }
         }
         return intent;
     }

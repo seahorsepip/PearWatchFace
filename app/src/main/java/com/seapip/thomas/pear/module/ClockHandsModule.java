@@ -17,6 +17,7 @@ public class ClockHandsModule implements Module {
     private Paint mHandPaint;
     private Paint mHollowHandPaint;
     private Paint mConnectHandCenterPaint;
+    private Paint mHandCenterPaint;
     private Paint mSecondsCenterPaint;
     private Paint mSecondsHandPaint;
     private Paint mCenterPaint;
@@ -37,6 +38,10 @@ public class ClockHandsModule implements Module {
         mConnectHandCenterPaint.setAntiAlias(true);
         mConnectHandCenterPaint.setColor(Color.WHITE);
         mConnectHandCenterPaint.setStrokeCap(Paint.Cap.ROUND);
+        mHandCenterPaint = new Paint();
+        mHandCenterPaint.setAntiAlias(true);
+        mHandCenterPaint.setColor(Color.WHITE);
+        mHandCenterPaint.setStrokeCap(Paint.Cap.ROUND);
         mSecondsCenterPaint = new Paint();
         mSecondsCenterPaint.setAntiAlias(true);
         mSecondsCenterPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -63,13 +68,18 @@ public class ClockHandsModule implements Module {
             stroke--;
         }
         mConnectHandCenterPaint.setStrokeWidth(stroke);
-        stroke = (int) (mBounds.width() * 0.030f);
+        stroke = (int) (mBounds.width() * 0.048f);
+        if(stroke % 2 != 0) {
+            stroke--;
+        }
+        mHandCenterPaint.setStrokeWidth(stroke);
+        stroke = (int) (mBounds.width() * 0.036f);
         if(stroke % 2 != 0) {
             stroke--;
         }
         mSecondsCenterPaint.setStrokeWidth(stroke);
-        mSecondsHandPaint.setStrokeWidth(mBounds.width() * 0.010f);
-        stroke = (int) (mBounds.width() * 0.018f);
+        mSecondsHandPaint.setStrokeWidth(mBounds.width() * 0.007f);
+        stroke = (int) (mBounds.width() * 0.012f);
         if(stroke % 2 != 0) {
             stroke--;
         }
@@ -80,7 +90,8 @@ public class ClockHandsModule implements Module {
     public void draw(Canvas canvas) {
         float hours = mCalendar.get(Calendar.HOUR);
         float minutes = mCalendar.get(Calendar.MINUTE);
-        float milliSeconds = mCalendar.get(Calendar.SECOND) * 1000 + mCalendar.get(Calendar.MILLISECOND);
+        float milliSeconds = mAmbient ?
+                0 : mCalendar.get(Calendar.SECOND) * 1000 + mCalendar.get(Calendar.MILLISECOND);
 
         /* Hour hand */
         float outerRadius = mBounds.width() * 0.28f - mHandPaint.getStrokeWidth();
@@ -104,7 +115,7 @@ public class ClockHandsModule implements Module {
 
         /* Minute hand */
         outerRadius = mBounds.width() * 0.46f - mHandPaint.getStrokeWidth();
-        rot = (float) (minutes * Math.PI * 2 / 60);
+        rot = (float) ((minutes + milliSeconds / 60000) * Math.PI * 2 / 60);
         innerX = (float) Math.sin(rot) * innerRadius;
         innerY = (float) -Math.cos(rot) * innerRadius;
         outerX = (float) Math.sin(rot) * outerRadius;
@@ -124,7 +135,7 @@ public class ClockHandsModule implements Module {
         /* Hands center */
         canvas.drawLine(mBounds.centerX(), mBounds.centerY(),
                 mBounds.centerX() + 0.0001f, mBounds.centerY(),
-                mHandPaint);
+                mHandCenterPaint);
 
         /* Seconds hand */
         if(!mAmbient) {

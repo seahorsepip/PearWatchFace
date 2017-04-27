@@ -7,7 +7,7 @@ import android.graphics.Rect;
 
 import java.util.Calendar;
 
-public class ClockHandsModule implements Module {
+public class AnalogClockModule implements Module {
     private Rect mBounds;
     private Calendar mCalendar;
     private boolean mAmbient;
@@ -22,7 +22,7 @@ public class ClockHandsModule implements Module {
     private Paint mSecondsHandPaint;
     private Paint mCenterPaint;
 
-    public ClockHandsModule(Calendar calendar) {
+    public AnalogClockModule(Calendar calendar) {
         mCalendar = calendar;
 
         /* Paint */
@@ -139,8 +139,8 @@ public class ClockHandsModule implements Module {
 
         /* Seconds hand */
         if(!mAmbient) {
-            outerRadius = mBounds.width() / 2 - mSecondsHandPaint.getStrokeWidth();
-            innerRadius = mBounds.width() * -0.06f - mSecondsHandPaint.getStrokeWidth();
+            outerRadius = mBounds.width() / 2;
+            innerRadius = mBounds.width() * -0.06f;
             rot = (float) (milliSeconds * Math.PI * 2 / 60000);
             innerX = (float) Math.sin(rot) * innerRadius;
             innerY = (float) -Math.cos(rot) * innerRadius;
@@ -160,30 +160,6 @@ public class ClockHandsModule implements Module {
         canvas.drawLine(mBounds.centerX(), mBounds.centerY(),
                 mBounds.centerX() + 0.0001f, mBounds.centerY(),
                 mCenterPaint);
-        /*
-        for (int i = 0; i < 60; i++) {
-            float rot = (float) (i * Math.PI * 2 / 60);
-            float innerX = (float) Math.sin(rot);
-            float innerY = (float) -Math.cos(rot);
-            float outerX = (float) Math.sin(rot) * outerRadius;
-            float outerY = (float) -Math.cos(rot) * outerRadius;
-            if (i % 5 == 0) {
-                innerX *= innerHourRadius;
-                innerY *= innerHourRadius;
-            } else {
-                innerX *= innerMinuteRadius;
-                innerY *= innerMinuteRadius;
-            }
-            canvas.drawLine(mBounds.centerX() + innerX, mBounds.centerY() + innerY,
-                    mBounds.centerX() + outerX, mBounds.centerY() + outerY,
-                    mTickPaint);
-            if (mAmbient && mBurnInProtection && mHollowTickPaint.getStrokeWidth() > 0) {
-                canvas.drawLine(mBounds.centerX() + innerX, mBounds.centerY() + innerY,
-                        mBounds.centerX() + outerX, mBounds.centerY() + outerY,
-                        mHollowTickPaint);
-            }
-        }
-        */
     }
 
     @Override

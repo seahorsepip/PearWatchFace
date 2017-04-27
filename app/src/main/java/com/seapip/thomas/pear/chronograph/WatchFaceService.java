@@ -1,4 +1,4 @@
-package com.seapip.thomas.pear.modular;
+package com.seapip.thomas.pear.chronograph;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -20,8 +20,9 @@ import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
+import com.seapip.thomas.pear.module.AnalogClockModule;
+import com.seapip.thomas.pear.module.ColorTicksModule;
 import com.seapip.thomas.pear.module.ComplicationModule;
-import com.seapip.thomas.pear.module.DigitalClockModule;
 import com.seapip.thomas.pear.module.Module;
 
 import java.lang.ref.WeakReference;
@@ -33,26 +34,33 @@ public class WatchFaceService extends CanvasWatchFaceService {
 
     public static final int[][] COMPLICATION_SUPPORTED_TYPES = {
             {ComplicationData.TYPE_RANGED_VALUE, ComplicationData.TYPE_SHORT_TEXT, ComplicationData.TYPE_SMALL_IMAGE, ComplicationData.TYPE_ICON},
-            {ComplicationData.TYPE_LONG_TEXT},
+            {ComplicationData.TYPE_RANGED_VALUE, ComplicationData.TYPE_SHORT_TEXT, ComplicationData.TYPE_SMALL_IMAGE, ComplicationData.TYPE_ICON},
+            {ComplicationData.TYPE_RANGED_VALUE, ComplicationData.TYPE_SHORT_TEXT, ComplicationData.TYPE_SMALL_IMAGE, ComplicationData.TYPE_ICON},
+            {ComplicationData.TYPE_RANGED_VALUE, ComplicationData.TYPE_SHORT_TEXT, ComplicationData.TYPE_SMALL_IMAGE, ComplicationData.TYPE_ICON},
+            {ComplicationData.TYPE_RANGED_VALUE, ComplicationData.TYPE_SHORT_TEXT, ComplicationData.TYPE_SMALL_IMAGE, ComplicationData.TYPE_ICON},
             {ComplicationData.TYPE_RANGED_VALUE, ComplicationData.TYPE_SHORT_TEXT, ComplicationData.TYPE_SMALL_IMAGE, ComplicationData.TYPE_ICON},
             {ComplicationData.TYPE_RANGED_VALUE, ComplicationData.TYPE_SHORT_TEXT, ComplicationData.TYPE_SMALL_IMAGE, ComplicationData.TYPE_ICON},
             {ComplicationData.TYPE_RANGED_VALUE, ComplicationData.TYPE_SHORT_TEXT, ComplicationData.TYPE_SMALL_IMAGE, ComplicationData.TYPE_ICON}
     };
-    public static final int MODULE_SPACING = 10;
-
-    private static final int TOP_LEFT_COMPLICATION = 0;
-    private static final int CENTER_COMPLICATION = 1;
-    private static final int BOTTOM_LEFT_COMPLICATION = 2;
-    private static final int BOTTOM_CENTER_COMPLICATION = 3;
-    private static final int BOTTOM_RIGHT_COMPLICATION = 4;
+    public static final long INTERACTIVE_UPDATE_RATE_MS = 20;
+    private static final int TOP_COMPLICATION = 0;
+    private static final int TOP_LEFT_COMPLICATION = 1;
+    private static final int TOP_RIGHT_COMPLICATION = 2;
+    private static final int LEFT_COMPLICATION = 3;
+    private static final int RIGHT_COMPLICATION = 4;
+    private static final int BOTTOM_COMPLICATION = 5;
+    private static final int BOTTOM_LEFT_COMPLICATION = 6;
+    private static final int BOTTOM_RIGHT_COMPLICATION = 7;
     public static final int[] COMPLICATION_IDS = {
+            TOP_COMPLICATION,
             TOP_LEFT_COMPLICATION,
-            CENTER_COMPLICATION,
+            TOP_RIGHT_COMPLICATION,
+            LEFT_COMPLICATION,
+            RIGHT_COMPLICATION,
+            BOTTOM_COMPLICATION,
             BOTTOM_LEFT_COMPLICATION,
-            BOTTOM_CENTER_COMPLICATION,
             BOTTOM_RIGHT_COMPLICATION
     };
-    private static final long INTERACTIVE_UPDATE_RATE_MS = 32;
     private static final int MSG_UPDATE_TIME = 0;
 
     public static int SETTINGS_MODE = 0;
@@ -109,12 +117,16 @@ public class WatchFaceService extends CanvasWatchFaceService {
 
         /*Modules */
         private ArrayList<Module> mModules;
+        private ComplicationModule mTopComplicationModule;
         private ComplicationModule mTopLeftComplicationModule;
-        private ComplicationModule mCenterComplicationModule;
+        private ComplicationModule mTopRightComplicationModule;
+        private ComplicationModule mLeftComplicationModule;
+        private ComplicationModule mRightComplicationModule;
+        private ComplicationModule mBottomComplicationModule;
         private ComplicationModule mBottomLeftComplicationModule;
-        private ComplicationModule mBottomCenterComplicationModule;
         private ComplicationModule mBottomRightComplicationModule;
-        private DigitalClockModule mDigitalClockModule;
+        private ColorTicksModule mColorTicksModule;
+        private AnalogClockModule mAnalogClockModule;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -131,26 +143,36 @@ public class WatchFaceService extends CanvasWatchFaceService {
 
             setActiveComplications(COMPLICATION_IDS);
 
+            mTopComplicationModule = new ComplicationModule(getApplicationContext());
             mTopLeftComplicationModule = new ComplicationModule(getApplicationContext());
-            mCenterComplicationModule = new ComplicationModule(getApplicationContext());
+            mTopRightComplicationModule = new ComplicationModule(getApplicationContext());
+            mLeftComplicationModule = new ComplicationModule(getApplicationContext());
+            mRightComplicationModule = new ComplicationModule(getApplicationContext());
+            mBottomComplicationModule = new ComplicationModule(getApplicationContext());
             mBottomLeftComplicationModule = new ComplicationModule(getApplicationContext());
-            mBottomCenterComplicationModule = new ComplicationModule(getApplicationContext());
             mBottomRightComplicationModule = new ComplicationModule(getApplicationContext());
-            mDigitalClockModule = new DigitalClockModule(mCalendar, true);
+            mColorTicksModule = new ColorTicksModule();
+            mAnalogClockModule = new AnalogClockModule(mCalendar);
 
             mModules = new ArrayList<>();
+            mModules.add(mTopComplicationModule);
             mModules.add(mTopLeftComplicationModule);
-            mModules.add(mCenterComplicationModule);
+            mModules.add(mTopRightComplicationModule);
+            mModules.add(mLeftComplicationModule);
+            mModules.add(mRightComplicationModule);
+            mModules.add(mBottomComplicationModule);
             mModules.add(mBottomLeftComplicationModule);
-            mModules.add(mBottomCenterComplicationModule);
             mModules.add(mBottomRightComplicationModule);
-            mModules.add(mDigitalClockModule);
+            mModules.add(mColorTicksModule);
+            mModules.add(mAnalogClockModule);
 
-            int color = mPrefs.getInt("settings_modular_color_value",
-                    Color.parseColor("#00BCD4"));
+            int color = mPrefs.getInt("settings_color_color_value", Color.parseColor("#00BCD4"));
+            int accentColor = mPrefs.getInt("settings_color_accent_color_value",
+                    Color.parseColor("#CDDC39"));
             for (Module module : mModules) {
                 module.setColor(color);
             }
+            mAnalogClockModule.setColor(accentColor);
         }
 
         @Override
@@ -174,7 +196,6 @@ public class WatchFaceService extends CanvasWatchFaceService {
             ((ComplicationModule) mModules.get(complicationId)).setComplicationData(complicationData);
             invalidate();
         }
-
 
         @Override
         public void onTimeTick() {
@@ -209,50 +230,51 @@ public class WatchFaceService extends CanvasWatchFaceService {
         }
 
         private void setBounds() {
-            int inset = mIsRound ? (mWidth - (int) Math.sqrt(mWidth * mWidth / 2)) / 2 : MODULE_SPACING;
+            int inset = 10;
             if (SETTINGS_MODE == 3) {
                 inset += 20;
             }
 
             Rect bounds = new Rect(inset, inset, mWidth - inset, mHeight - inset);
+            Rect screenBounds = new Rect(inset - 5, inset - 5,
+                    mWidth - inset + 5, mHeight - inset + 5);
 
-            mTopLeftComplicationModule.setBounds(new Rect(
-                    bounds.left,
-                    bounds.top,
-                    bounds.left + (bounds.width() - MODULE_SPACING * 2) / 3,
-                    bounds.top + (bounds.height() - MODULE_SPACING * 2) / 3)
-            );
-            mCenterComplicationModule.setBounds(new Rect(
-                    bounds.left,
-                    bounds.top + (bounds.height() - MODULE_SPACING * 2) / 3 + MODULE_SPACING,
-                    bounds.right,
-                    bounds.bottom - (bounds.height() - MODULE_SPACING * 2) / 3 - MODULE_SPACING)
-            );
-            mBottomLeftComplicationModule.setBounds(new Rect(
-                    bounds.left,
-                    bounds.bottom - (bounds.height() - MODULE_SPACING * 2) / 3,
-                    bounds.left + (bounds.width() - MODULE_SPACING * 2) / 3,
-                    bounds.bottom)
-            );
-            mBottomCenterComplicationModule.setBounds(new Rect(
-                    bounds.left + (bounds.width() - MODULE_SPACING * 2) / 3 + MODULE_SPACING,
-                    bounds.bottom - (bounds.height() - MODULE_SPACING * 2) / 3,
-                    bounds.right - (bounds.width() - MODULE_SPACING * 2) / 3 - MODULE_SPACING,
-                    bounds.bottom
-            ));
-            mBottomRightComplicationModule.setBounds(new Rect(
-                    bounds.right - (bounds.width() - MODULE_SPACING * 2) / 3,
-                    bounds.bottom - (bounds.height() - MODULE_SPACING * 2) / 3,
-                    bounds.right,
-                    bounds.bottom)
-            );
-            mDigitalClockModule.setBounds(new Rect(
-                    bounds.right - (bounds.width() - MODULE_SPACING * 2) / 3 * 2 - MODULE_SPACING,
-                    bounds.top,
-                    bounds.right,
-                    bounds.top + bounds.height() / 3 - MODULE_SPACING / 2)
-            );
-
+            int offset = (int) (bounds.height() * 0.18f);
+            int size = (int) (bounds.width() * 0.20f);
+            mTopComplicationModule.setBounds(new Rect(bounds.centerX() - size / 2,
+                    bounds.top + offset,
+                    bounds.centerX() + size / 2,
+                    bounds.top + offset + size));
+            mTopLeftComplicationModule.setBounds(new Rect(screenBounds.left,
+                    screenBounds.top,
+                    screenBounds.left + size,
+                    screenBounds.top + size));
+            mTopRightComplicationModule.setBounds(new Rect(screenBounds.right - size,
+                    screenBounds.top,
+                    screenBounds.right,
+                    screenBounds.top + size));
+            mLeftComplicationModule.setBounds(new Rect(bounds.left + offset,
+                    bounds.centerY() - size / 2,
+                    bounds.left + offset + size,
+                    bounds.centerY() + size / 2));
+            mRightComplicationModule.setBounds(new Rect(bounds.right - offset - size,
+                    bounds.centerY() - size / 2,
+                    bounds.right - offset,
+                    bounds.centerY() + size / 2));
+            mBottomComplicationModule.setBounds(new Rect(bounds.centerX() - size / 2,
+                    bounds.bottom - offset - size,
+                    bounds.centerX() + size / 2,
+                    bounds.bottom - offset));
+            mBottomLeftComplicationModule.setBounds(new Rect(screenBounds.left,
+                    screenBounds.bottom - size,
+                    screenBounds.left + size,
+                    screenBounds.bottom));
+            mBottomRightComplicationModule.setBounds(new Rect(screenBounds.right - size,
+                    screenBounds.bottom - size,
+                    screenBounds.right,
+                    screenBounds.bottom));
+            mColorTicksModule.setBounds(bounds);
+            mAnalogClockModule.setBounds(bounds);
         }
 
         @Override
@@ -297,16 +319,27 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     SETTINGS_MODE = 0;
                     break;
                 case 3:
-                    int color = mPrefs.getInt("settings_modular_color_value", Color.parseColor("#00BCD4"));
+                    setBounds();
+                    int color = mPrefs.getInt("settings_color_color_value",
+                            Color.parseColor("#00BCD4"));
+                    int accentColor = mPrefs.getInt("settings_color_accent_color_value",
+                            Color.parseColor("#CDDC39"));
                     for (Module module : mModules) {
                         module.setColor(color);
                     }
-                    setBounds();
+                    mAnalogClockModule.setColor(accentColor);
                     mWatchFaceStyleBuilder.setHideStatusBar(true);
                     mWatchFaceStyleBuilder.setAcceptsTapEvents(false);
                     setWatchFaceStyle(mWatchFaceStyleBuilder.build());
                     SETTINGS_MODE = 2;
                     break;
+            }
+
+            if(SETTINGS_MODE > 1) {
+                mCalendar.set(Calendar.HOUR, 10);
+                mCalendar.set(Calendar.MINUTE, 10);
+                mCalendar.set(Calendar.SECOND, 30);
+                mCalendar.set(Calendar.MILLISECOND, 0);
             }
 
             canvas.drawColor(Color.BLACK);

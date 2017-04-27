@@ -1,4 +1,4 @@
-package com.seapip.thomas.pear.simple;
+package com.seapip.thomas.pear.chronograph;
 
 import android.content.ComponentName;
 import android.content.SharedPreferences;
@@ -34,6 +34,7 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
         super.onCreate(savedInstanceState);
 
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext().getApplicationContext());
+        final SharedPreferences.Editor editor = preferences.edit();
         adapter = new SettingsAdapter(getFragmentManager()) {
             @Override
             public ArrayList<SettingsRow> initPages() {
@@ -42,44 +43,21 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                 DisplayMetrics metrics = getApplicationContext().getResources().getDisplayMetrics();
                 int width = metrics.widthPixels;
                 int height = metrics.heightPixels;
-                int inset = (int) (width * 0.07f);
-                Rect screenBounds = new Rect(inset + 5, inset + 5,
-                        width - inset - 5, height - inset - 5);
+                int inset = 20;
                 Rect bounds = new Rect(inset, inset, width - inset, height - inset);
-                Rect insetBounds = new Rect(inset + 10, inset + 10,
-                        width - inset - 10, height - inset - 10);
-
-                ArrayList<SettingsOverlay> styleModules = new ArrayList<>();
-                final SettingsOverlay styleOverlay = new SettingsOverlay(new Rect(20, 20,
-                        width - 20, height - 20), bounds, "Detail", Paint.Align.CENTER);
-                styleOverlay.setRound(true);
-                styleOverlay.setInsetTitle(true);
-                styleOverlay.setActive(true);
-                styleOverlay.setRunnable(new Runnable() {
-                    @Override
-                    public void run() {
-                        int style = preferences.getInt("settings_simple_style", 0);
-                        style++;
-                        style = style > 3 ? 0 : style;
-                        preferences.edit().putInt("settings_simple_style", style).apply();
-                        setSettingsMode(true);
-                    }
-                });
-                styleModules.add(styleOverlay);
+                Rect insetBounds = new Rect(30, 30, width - 30, height - 30);
+                Rect screenBounds = new Rect(25, 25, width - 25, height - 25);
 
                 ArrayList<SettingsOverlay> colorModules = new ArrayList<>();
-                SettingsOverlay colorOverlay = new SettingsOverlay(new Rect(
-                        bounds.left + (int) (0.18f * bounds.width()),
-                        bounds.top + (int) (0.18f * bounds.height()),
-                        bounds.right - (int) (0.18f * bounds.width()),
-                        bounds.bottom - (int) (0.18f * bounds.height())),
-                        bounds, "Color", Paint.Align.CENTER);
+                SettingsOverlay colorOverlay = new SettingsOverlay(bounds, bounds,
+                        "Color", Paint.Align.CENTER);
                 setColorOverlay(colorOverlay,
-                        "settings_simple_color_name",
-                        "settings_simple_color_value",
+                        "settings_color_color_name",
+                        "settings_color_color_value",
                         "Cyan",
                         Color.parseColor("#00BCD4"));
-                colorOverlay.setRound(true);
+                colorOverlay.setRound(WatchFaceService.ROUND);
+                colorOverlay.setInsetTitle(true);
                 colorOverlay.setActive(true);
                 colorModules.add(colorOverlay);
 
@@ -91,10 +69,10 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                                 bounds.bottom),
                         bounds, "Color", Paint.Align.CENTER);
                 setColorOverlay(accentColorOverlay,
-                        "settings_simple_accent_color_name",
-                        "settings_simple_accent_color_value",
-                        "Cyan",
-                        Color.parseColor("#00BCD4"));
+                        "settings_color_accent_color_name",
+                        "settings_color_accent_color_value",
+                        "Lime",
+                        Color.parseColor("#CDDC39"));
                 accentColorOverlay.setRound(true);
                 accentColorOverlay.setActive(true);
                 accentColorModules.add(accentColorOverlay);
@@ -140,7 +118,7 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                         WatchFaceService.COMPLICATION_IDS[2],
                         WatchFaceService.COMPLICATION_SUPPORTED_TYPES[2]);
                 topRightComplicationOverlay.setBottomTitle(true);
-                if (WatchFaceService.ROUND) {
+                if(WatchFaceService.ROUND) {
                     topComplicationOverlay.setActive(true);
                 } else {
                     topLeftComplicationOverlay.setActive(true);
@@ -205,7 +183,7 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                         WatchFaceService.class,
                         WatchFaceService.COMPLICATION_IDS[7],
                         WatchFaceService.COMPLICATION_SUPPORTED_TYPES[7]);
-                if (WatchFaceService.ROUND) {
+                if(WatchFaceService.ROUND) {
                     topLeftComplicationOverlay.setDisabled(true);
                     topRightComplicationOverlay.setDisabled(true);
                     bottomLeftComplicationOverlay.setDisabled(true);
@@ -233,7 +211,6 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                 finishModules.add(finishOverlay);
 
                 SettingsRow row = new SettingsRow();
-                row.addPages(new SettingsPage(styleModules));
                 row.addPages(new SettingsPage(colorModules));
                 row.addPages(new SettingsPage(accentColorModules));
                 row.addPages(new SettingsPage(mComplicationModules));

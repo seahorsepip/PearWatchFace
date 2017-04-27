@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.seapip.thomas.pear.motion;
 
 import android.content.BroadcastReceiver;
@@ -95,6 +79,8 @@ public class WatchFaceService extends CanvasWatchFaceService {
         };
         private boolean mRegisteredTimeZoneReceiver = false;
 
+        private WatchFaceStyle.Builder mWatchFaceStyleBuilder;
+
         /* Display */
         private int mWidth;
         private int mHeight;
@@ -111,11 +97,11 @@ public class WatchFaceService extends CanvasWatchFaceService {
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
 
-            setWatchFaceStyle(new WatchFaceStyle.Builder(WatchFaceService.this)
+            mWatchFaceStyleBuilder = new WatchFaceStyle.Builder(WatchFaceService.this)
                     .setStatusBarGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL)
                     .setViewProtectionMode(WatchFaceStyle.PROTECT_STATUS_BAR)
-                    .setAcceptsTapEvents(true)
-                    .build());
+                    .setAcceptsTapEvents(true);
+            setWatchFaceStyle(mWatchFaceStyleBuilder.build());
 
             mCalendar = Calendar.getInstance();
             mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -230,6 +216,9 @@ public class WatchFaceService extends CanvasWatchFaceService {
             switch (SETTINGS_MODE) {
                 case 1:
                     setBounds();
+                    mWatchFaceStyleBuilder.setHideStatusBar(false);
+                    mWatchFaceStyleBuilder.setAcceptsTapEvents(true);
+                    setWatchFaceStyle(mWatchFaceStyleBuilder.build());
                     SETTINGS_MODE = 0;
                     break;
                 case 3:
@@ -238,6 +227,9 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     int scene = mPrefs.getInt("settings_motion_scene", 0);
                     mMotionDateModule.setDate(date);
                     mMotionModule.setScene(scene);
+                    mWatchFaceStyleBuilder.setHideStatusBar(true);
+                    mWatchFaceStyleBuilder.setAcceptsTapEvents(false);
+                    setWatchFaceStyle(mWatchFaceStyleBuilder.build());
                     SETTINGS_MODE = 2;
                     break;
             }

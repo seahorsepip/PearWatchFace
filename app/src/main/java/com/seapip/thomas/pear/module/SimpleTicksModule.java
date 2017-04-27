@@ -65,41 +65,41 @@ public class SimpleTicksModule implements Module {
             float rot = (float) (i * Math.PI * 2 / 240);
             float x = (float) Math.sin(rot);
             float y = (float) -Math.cos(rot);
-            if ((mStyle > 0 && i % 4 == 0)
-                    || mStyle > 2 && i % 2 == 0 && i % 20 != 0
-                    || mStyle > 3 && i % 20 != 0) {
+            if ((mStyle == 1 && i % 4 == 0)
+                    || mStyle == 2 && i % 2 == 0 && i % 20 != 0
+                    || mStyle == 3 && i % 20 != 0) {
                 canvas.drawLine(mBounds.centerX() + x * innerRadius,
                         mBounds.centerY() + y * innerRadius,
                         mBounds.centerX() + x * outerRadius,
                         mBounds.centerY() + y * outerRadius,
                         mSecondsTickPaint);
             }
-            if (mStyle > 1 && i % 20 == 0) {
-                canvas.drawLine(mBounds.centerX() + x * innerRadius,
-                        mBounds.centerY() + y * innerRadius,
-                        mBounds.centerX() + x * outerRadius,
-                        mBounds.centerY() + y * outerRadius,
-                        mMinuteTickPaint);
-            }
-            if (mStyle > 2 && i % 20 == 0) {
-                canvas.drawLine(mBounds.centerX() + x * hourInnerRadius,
-                        mBounds.centerY() + y * hourInnerRadius,
-                        mBounds.centerX() + x * hourOuterRadius,
-                        mBounds.centerY() + y * hourOuterRadius,
-                        mHourTickPaint);
-                if(mAmbient && mBurnInProtection && mHollowHourTickPaint.getStrokeWidth() > 0) {
+            if(i % 20 == 0) {
+                if(mStyle > 1) {
+                    canvas.drawLine(mBounds.centerX() + x * innerRadius,
+                            mBounds.centerY() + y * innerRadius,
+                            mBounds.centerX() + x * outerRadius,
+                            mBounds.centerY() + y * outerRadius,
+                            mMinuteTickPaint);
                     canvas.drawLine(mBounds.centerX() + x * hourInnerRadius,
                             mBounds.centerY() + y * hourInnerRadius,
                             mBounds.centerX() + x * hourOuterRadius,
                             mBounds.centerY() + y * hourOuterRadius,
-                            mHollowHourTickPaint);
+                            mHourTickPaint);
+                    if(mAmbient && mBurnInProtection && mHollowHourTickPaint.getStrokeWidth() > 0) {
+                        canvas.drawLine(mBounds.centerX() + x * hourInnerRadius,
+                                mBounds.centerY() + y * hourInnerRadius,
+                                mBounds.centerX() + x * hourOuterRadius,
+                                mBounds.centerY() + y * hourOuterRadius,
+                                mHollowHourTickPaint);
+                    }
                 }
-            }
-            if (mStyle > 3 && i % 20 == 0) {
-                canvas.drawText(String.valueOf(i / 4),
-                        mBounds.centerX() + x * textRadius,
-                        mBounds.centerY() + y * textRadius - (mTickTextPaint.descent() + mTickTextPaint.ascent()) / 2,
-                        mTickTextPaint);
+                if(mStyle > 2) {
+                    canvas.drawText(String.valueOf(i / 4 == 0 ? 60 : i / 4),
+                            mBounds.centerX() + x * textRadius,
+                            mBounds.centerY() + y * textRadius - (mTickTextPaint.descent() + mTickTextPaint.ascent()) / 2,
+                            mTickTextPaint);
+                }
             }
         }
     }

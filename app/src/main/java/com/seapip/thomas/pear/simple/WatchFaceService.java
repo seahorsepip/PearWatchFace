@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.seapip.thomas.pear.simple;
 
 import android.app.PendingIntent;
@@ -36,7 +20,7 @@ import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
-import com.seapip.thomas.pear.module.ClockHandsModule;
+import com.seapip.thomas.pear.module.AnalogClockModule;
 import com.seapip.thomas.pear.module.ComplicationModule;
 import com.seapip.thomas.pear.module.Module;
 import com.seapip.thomas.pear.module.SimpleTicksModule;
@@ -123,6 +107,8 @@ public class WatchFaceService extends CanvasWatchFaceService {
         };
         private boolean mRegisteredTimeZoneReceiver = false;
 
+        private WatchFaceStyle.Builder mWatchFaceStyleBuilder;
+
         /* Display */
         private int mWidth;
         private int mHeight;
@@ -140,7 +126,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
         private ComplicationModule mBottomLeftComplicationModule;
         private ComplicationModule mBottomRightComplicationModule;
         private SimpleTicksModule mSimpleTicksModule;
-        private ClockHandsModule mClockHandsModule;
+        private AnalogClockModule mAnalogClockModule;
 
         /* Style */
         private int mStyle;
@@ -149,11 +135,12 @@ public class WatchFaceService extends CanvasWatchFaceService {
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
 
-            setWatchFaceStyle(new WatchFaceStyle.Builder(WatchFaceService.this)
+            mWatchFaceStyleBuilder = new WatchFaceStyle.Builder(WatchFaceService.this)
                     .setStatusBarGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL)
                     .setViewProtectionMode(WatchFaceStyle.PROTECT_STATUS_BAR)
-                    .setAcceptsTapEvents(true)
-                    .build());
+                    .setAcceptsTapEvents(true);
+
+            setWatchFaceStyle(mWatchFaceStyleBuilder.build());
 
             mCalendar = Calendar.getInstance();
             mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -171,7 +158,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
             mBottomLeftComplicationModule = new ComplicationModule(getApplicationContext());
             mBottomRightComplicationModule = new ComplicationModule(getApplicationContext());
             mSimpleTicksModule = new SimpleTicksModule(mStyle);
-            mClockHandsModule = new ClockHandsModule(mCalendar);
+            mAnalogClockModule = new AnalogClockModule(mCalendar);
 
             mModules = new ArrayList<>();
             mModules.add(mTopComplicationModule);
@@ -183,7 +170,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
             mModules.add(mBottomLeftComplicationModule);
             mModules.add(mBottomRightComplicationModule);
             mModules.add(mSimpleTicksModule);
-            mModules.add(mClockHandsModule);
+            mModules.add(mAnalogClockModule);
 
             int color = mPrefs.getInt("settings_simple_color_value", Color.parseColor("#00BCD4"));
             int accentColor = mPrefs.getInt("settings_simple_accent_color_value",
@@ -195,7 +182,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
             mLeftComplicationModule.setColor(color);
             mBottomComplicationModule.setColor(color);
             mRightComplicationModule.setColor(color);
-            mClockHandsModule.setColor(accentColor);
+            mAnalogClockModule.setColor(accentColor);
         }
 
         @Override
@@ -261,7 +248,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
             Rect screenBounds = new Rect(inset - 5, inset - 5,
                     mWidth - inset + 5, mHeight - inset + 5);
             if (SETTINGS_MODE < 3) {
-                inset += mStyle == 4 ? (int) (mWidth * 0.07f) : 0;
+                inset += mStyle == 3 ? (int) (mWidth * 0.07f) : 0;
             }
             Rect bounds = new Rect(inset, inset, mWidth - inset, mHeight - inset);
 
@@ -300,7 +287,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     screenBounds.right,
                     screenBounds.bottom));
             mSimpleTicksModule.setBounds(bounds);
-            mClockHandsModule.setBounds(bounds);
+            mAnalogClockModule.setBounds(bounds);
         }
 
         @Override
@@ -339,6 +326,9 @@ public class WatchFaceService extends CanvasWatchFaceService {
             switch (SETTINGS_MODE) {
                 case 1:
                     setBounds();
+                    mWatchFaceStyleBuilder.setHideStatusBar(false);
+                    mWatchFaceStyleBuilder.setAcceptsTapEvents(true);
+                    setWatchFaceStyle(mWatchFaceStyleBuilder.build());
                     SETTINGS_MODE = 0;
                     break;
                 case 3:
@@ -347,15 +337,15 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     int color = mPrefs.getInt("settings_simple_color_value", Color.parseColor("#00BCD4"));
                     int accentColor = mPrefs.getInt("settings_simple_accent_color_value",
                             Color.parseColor("#00BCD4"));
-                    for(Module module : mModules) {
-                        module.setColor(Color.parseColor("#747474"));
-                    }
                     mTopComplicationModule.setColor(color);
                     mLeftComplicationModule.setColor(color);
                     mBottomComplicationModule.setColor(color);
                     mRightComplicationModule.setColor(color);
-                    mClockHandsModule.setColor(accentColor);
+                    mAnalogClockModule.setColor(accentColor);
                     mSimpleTicksModule.setStyle(mStyle);
+                    mWatchFaceStyleBuilder.setHideStatusBar(true);
+                    mWatchFaceStyleBuilder.setAcceptsTapEvents(false);
+                    setWatchFaceStyle(mWatchFaceStyleBuilder.build());
                     SETTINGS_MODE = 2;
                     break;
             }

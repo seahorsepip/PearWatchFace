@@ -47,7 +47,6 @@ public class AnalogClockModule implements Module {
         mSecondsCenterPaint.setStrokeCap(Paint.Cap.ROUND);
         mSecondsHandPaint = new Paint();
         mSecondsHandPaint.setAntiAlias(true);
-        mSecondsHandPaint.setStrokeCap(Paint.Cap.ROUND);
         mCenterPaint = new Paint();
         mCenterPaint.setAntiAlias(true);
         mCenterPaint.setColor(Color.BLACK);
@@ -140,7 +139,7 @@ public class AnalogClockModule implements Module {
         /* Seconds hand */
         if(!mAmbient) {
             outerRadius = mBounds.width() / 2;
-            innerRadius = mBounds.width() * -0.06f;
+            innerRadius = mBounds.width() * -0.08f;
             rot = (float) (milliSeconds * Math.PI * 2 / 60000);
             innerX = (float) Math.sin(rot) * innerRadius;
             innerY = (float) -Math.cos(rot) * innerRadius;

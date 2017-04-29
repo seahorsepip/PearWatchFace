@@ -20,8 +20,11 @@ import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
-import com.seapip.thomas.pear.module.AnalogClockModule;
-import com.seapip.thomas.pear.module.ColorTicksModule;
+import com.seapip.thomas.pear.R;
+import com.seapip.thomas.pear.Timer;
+import com.seapip.thomas.pear.module.ButtonModule;
+import com.seapip.thomas.pear.module.ChronographClockModule;
+import com.seapip.thomas.pear.module.ChronographTicksModule;
 import com.seapip.thomas.pear.module.ComplicationModule;
 import com.seapip.thomas.pear.module.Module;
 
@@ -43,21 +46,15 @@ public class WatchFaceService extends CanvasWatchFaceService {
             {ComplicationData.TYPE_RANGED_VALUE, ComplicationData.TYPE_SHORT_TEXT, ComplicationData.TYPE_SMALL_IMAGE, ComplicationData.TYPE_ICON}
     };
     public static final long INTERACTIVE_UPDATE_RATE_MS = 20;
-    private static final int TOP_COMPLICATION = 0;
-    private static final int TOP_LEFT_COMPLICATION = 1;
-    private static final int TOP_RIGHT_COMPLICATION = 2;
-    private static final int LEFT_COMPLICATION = 3;
-    private static final int RIGHT_COMPLICATION = 4;
-    private static final int BOTTOM_COMPLICATION = 5;
-    private static final int BOTTOM_LEFT_COMPLICATION = 6;
-    private static final int BOTTOM_RIGHT_COMPLICATION = 7;
+    private static final int TOP_LEFT_COMPLICATION = 0;
+    private static final int TOP_RIGHT_COMPLICATION = 1;
+    private static final int RIGHT_COMPLICATION = 2;
+    private static final int BOTTOM_LEFT_COMPLICATION = 3;
+    private static final int BOTTOM_RIGHT_COMPLICATION = 4;
     public static final int[] COMPLICATION_IDS = {
-            TOP_COMPLICATION,
             TOP_LEFT_COMPLICATION,
             TOP_RIGHT_COMPLICATION,
-            LEFT_COMPLICATION,
             RIGHT_COMPLICATION,
-            BOTTOM_COMPLICATION,
             BOTTOM_LEFT_COMPLICATION,
             BOTTOM_RIGHT_COMPLICATION
     };
@@ -117,16 +114,21 @@ public class WatchFaceService extends CanvasWatchFaceService {
 
         /*Modules */
         private ArrayList<Module> mModules;
-        private ComplicationModule mTopComplicationModule;
         private ComplicationModule mTopLeftComplicationModule;
         private ComplicationModule mTopRightComplicationModule;
-        private ComplicationModule mLeftComplicationModule;
         private ComplicationModule mRightComplicationModule;
-        private ComplicationModule mBottomComplicationModule;
         private ComplicationModule mBottomLeftComplicationModule;
         private ComplicationModule mBottomRightComplicationModule;
-        private ColorTicksModule mColorTicksModule;
-        private AnalogClockModule mAnalogClockModule;
+        private ChronographTicksModule mChronographTicksModule;
+        private ButtonModule mStartButtonModule;
+        private ButtonModule mContinueButtonModule;
+        private ButtonModule mPauseButtonModule;
+        private ButtonModule mStopButtonModule;
+        private ButtonModule mLapButtonModule;
+        private ChronographClockModule mChronographClockModule;
+
+        /* Timer */
+        private Timer mTimer;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -138,41 +140,60 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     .setAcceptsTapEvents(true);
             setWatchFaceStyle(mWatchFaceStyleBuilder.build());
 
+            Context context = getApplicationContext();
             mCalendar = Calendar.getInstance();
-            mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+
 
             setActiveComplications(COMPLICATION_IDS);
 
-            mTopComplicationModule = new ComplicationModule(getApplicationContext());
-            mTopLeftComplicationModule = new ComplicationModule(getApplicationContext());
-            mTopRightComplicationModule = new ComplicationModule(getApplicationContext());
-            mLeftComplicationModule = new ComplicationModule(getApplicationContext());
-            mRightComplicationModule = new ComplicationModule(getApplicationContext());
-            mBottomComplicationModule = new ComplicationModule(getApplicationContext());
-            mBottomLeftComplicationModule = new ComplicationModule(getApplicationContext());
-            mBottomRightComplicationModule = new ComplicationModule(getApplicationContext());
-            mColorTicksModule = new ColorTicksModule();
-            mAnalogClockModule = new AnalogClockModule(mCalendar);
+            int scale = mPrefs.getInt("settings_chronograph_scale", 60);
+            mTimer = new Timer(getApplicationContext());
+
+            mTopLeftComplicationModule = new ComplicationModule(context);
+            mTopRightComplicationModule = new ComplicationModule(context);
+            mRightComplicationModule = new ComplicationModule(context);
+            mBottomLeftComplicationModule = new ComplicationModule(context);
+            mBottomRightComplicationModule = new ComplicationModule(context);
+            mChronographTicksModule = new ChronographTicksModule(12);
+            mStartButtonModule = new ButtonModule(context.getDrawable(R.drawable.ic_timer_black_24dp));
+            mContinueButtonModule = new ButtonModule(
+                    context.getDrawable(R.drawable.ic_continue_black_24dp),
+                    context.getDrawable(R.drawable.ic_continue_burninprotection_black_24px));
+            mPauseButtonModule = new ButtonModule(context.getDrawable(R.drawable.ic_pause_black_24dp));
+            mStopButtonModule = new ButtonModule(context.getDrawable(R.drawable.ic_stop_black_24dp));
+            mLapButtonModule = new ButtonModule(context.getDrawable(R.drawable.ic_lap_black_24dp));
+            mChronographClockModule = new ChronographClockModule(mCalendar, scale);
 
             mModules = new ArrayList<>();
-            mModules.add(mTopComplicationModule);
             mModules.add(mTopLeftComplicationModule);
             mModules.add(mTopRightComplicationModule);
-            mModules.add(mLeftComplicationModule);
             mModules.add(mRightComplicationModule);
-            mModules.add(mBottomComplicationModule);
             mModules.add(mBottomLeftComplicationModule);
             mModules.add(mBottomRightComplicationModule);
-            mModules.add(mColorTicksModule);
-            mModules.add(mAnalogClockModule);
+            mModules.add(mChronographTicksModule);
+            mModules.add(mStartButtonModule);
+            mModules.add(mContinueButtonModule);
+            mModules.add(mPauseButtonModule);
+            mModules.add(mStopButtonModule);
+            mModules.add(mLapButtonModule);
+            mModules.add(mChronographClockModule);
 
-            int color = mPrefs.getInt("settings_color_color_value", Color.parseColor("#00BCD4"));
-            int accentColor = mPrefs.getInt("settings_color_accent_color_value",
+            int color = mPrefs.getInt("settings_chronograph_color_value", Color.parseColor("#00BCD4"));
+            int accentColor = mPrefs.getInt("settings_chronograph_accent_color_value",
                     Color.parseColor("#CDDC39"));
             for (Module module : mModules) {
-                module.setColor(color);
+                module.setColor(Color.parseColor("#747474"));
             }
-            mAnalogClockModule.setColor(accentColor);
+            mRightComplicationModule.setColor(color);
+            mStartButtonModule.setColor(color);
+            mContinueButtonModule.setColor(color);
+            mPauseButtonModule.setColor(accentColor);
+            mStopButtonModule.setColor(Color.WHITE);
+            mLapButtonModule.setColor(Color.WHITE);
+            mChronographClockModule.setColor(accentColor);
+            mChronographClockModule.setAccentColor(color);
+            mChronographClockModule.setLapValue(-1);
         }
 
         @Override
@@ -210,6 +231,9 @@ public class WatchFaceService extends CanvasWatchFaceService {
             for (Module module : mModules) {
                 module.setAmbient(inAmbientMode);
             }
+            if (mAmbient && mTimer.isRunning() && !mTimer.isPaused()) {
+                mTimer.pause(mCalendar);
+            }
             updateTimer();
         }
 
@@ -241,10 +265,6 @@ public class WatchFaceService extends CanvasWatchFaceService {
 
             int offset = (int) (bounds.height() * 0.18f);
             int size = (int) (bounds.width() * 0.20f);
-            mTopComplicationModule.setBounds(new Rect(bounds.centerX() - size / 2,
-                    bounds.top + offset,
-                    bounds.centerX() + size / 2,
-                    bounds.top + offset + size));
             mTopLeftComplicationModule.setBounds(new Rect(screenBounds.left,
                     screenBounds.top,
                     screenBounds.left + size,
@@ -253,18 +273,10 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     screenBounds.top,
                     screenBounds.right,
                     screenBounds.top + size));
-            mLeftComplicationModule.setBounds(new Rect(bounds.left + offset,
+            mRightComplicationModule.setBounds(new Rect(bounds.right - offset - size - size / 4,
                     bounds.centerY() - size / 2,
-                    bounds.left + offset + size,
+                    bounds.right - offset + size / 4,
                     bounds.centerY() + size / 2));
-            mRightComplicationModule.setBounds(new Rect(bounds.right - offset - size,
-                    bounds.centerY() - size / 2,
-                    bounds.right - offset,
-                    bounds.centerY() + size / 2));
-            mBottomComplicationModule.setBounds(new Rect(bounds.centerX() - size / 2,
-                    bounds.bottom - offset - size,
-                    bounds.centerX() + size / 2,
-                    bounds.bottom - offset));
             mBottomLeftComplicationModule.setBounds(new Rect(screenBounds.left,
                     screenBounds.bottom - size,
                     screenBounds.left + size,
@@ -273,8 +285,21 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     screenBounds.bottom - size,
                     screenBounds.right,
                     screenBounds.bottom));
-            mColorTicksModule.setBounds(bounds);
-            mAnalogClockModule.setBounds(bounds);
+            mChronographTicksModule.setBounds(bounds);
+            Rect leftDialBounds = new Rect(bounds.left + offset,
+                    bounds.centerY() - size / 2,
+                    bounds.left + offset + size,
+                    bounds.centerY() + size / 2);
+            mStartButtonModule.setBounds(leftDialBounds);
+            mContinueButtonModule.setBounds(leftDialBounds);
+            mPauseButtonModule.setBounds(leftDialBounds);
+            Rect rightDialBounds = new Rect(bounds.right - offset - size,
+                    bounds.centerY() - size / 2,
+                    bounds.right - offset,
+                    bounds.centerY() + size / 2);
+            mLapButtonModule.setBounds(rightDialBounds);
+            mStopButtonModule.setBounds(rightDialBounds);
+            mChronographClockModule.setBounds(bounds);
         }
 
         @Override
@@ -288,16 +313,40 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     break;
                 case TAP_TYPE_TAP:
                     // The user has completed the tap gesture.
-                    for (Module module : mModules) {
-                        if (module instanceof ComplicationModule &&
-                                ((ComplicationModule) module).contains(x, y)) {
-                            PendingIntent intent = ((ComplicationModule) module).getTapAction();
-                            if (intent != null) {
-                                try {
-                                    intent.send();
-                                } catch (PendingIntent.CanceledException e) {
+                    if(!mTimer.isRunning()) {
+                        for (Module module : mModules) {
+                            if (module instanceof ComplicationModule &&
+                                    ((ComplicationModule) module).contains(x, y)) {
+                                PendingIntent intent = ((ComplicationModule) module).getTapAction();
+                                if (intent != null) {
+                                    try {
+                                        intent.send();
+                                    } catch (PendingIntent.CanceledException e) {
+                                    }
                                 }
                             }
+                        }
+                    }
+                    if (mStartButtonModule.contains(x, y)) {
+                        if (mTimer.isRunning()) {
+                            if (mTimer.isPaused()) {
+                                mTimer.start(mCalendar);
+                            } else {
+                                mTimer.pause(mCalendar);
+                            }
+                        } else {
+                            mTimer.reset(mCalendar);
+                            int scale = mPrefs.getInt("settings_chronograph_scale", 60);
+                            mChronographTicksModule.setScale(scale);
+                        }
+                    } else if (mTimer.isRunning() && mStopButtonModule.contains(x, y)) {
+                        if (mTimer.isPaused()) {
+                            mTimer.stop();
+                            mChronographTicksModule.setScale(12);
+                            mChronographClockModule.setValue(0);
+                            mChronographClockModule.setLapValue(-1);
+                        } else {
+                            mTimer.lap(mCalendar);
                         }
                     }
                     break;
@@ -313,42 +362,74 @@ public class WatchFaceService extends CanvasWatchFaceService {
             switch (SETTINGS_MODE) {
                 case 1:
                     setBounds();
+                    mChronographTicksModule.setScale(12);
                     mWatchFaceStyleBuilder.setHideStatusBar(false);
-                    mWatchFaceStyleBuilder.setAcceptsTapEvents(true);
                     setWatchFaceStyle(mWatchFaceStyleBuilder.build());
                     SETTINGS_MODE = 0;
                     break;
                 case 3:
-                    setBounds();
-                    int color = mPrefs.getInt("settings_color_color_value",
-                            Color.parseColor("#00BCD4"));
-                    int accentColor = mPrefs.getInt("settings_color_accent_color_value",
-                            Color.parseColor("#CDDC39"));
-                    for (Module module : mModules) {
-                        module.setColor(color);
+                    if (mTimer.isRunning()) {
+                        mTimer.stop();
                     }
-                    mAnalogClockModule.setColor(accentColor);
+                    setBounds();
+                    int scale = mPrefs.getInt("settings_chronograph_scale", 60);
+                    int color = mPrefs.getInt("settings_chronograph_color_value",
+                            Color.parseColor("#00BCD4"));
+                    int accentColor = mPrefs.getInt("settings_chronograph_accent_color_value",
+                            Color.parseColor("#CDDC39"));
+                    mRightComplicationModule.setColor(color);
+                    mStartButtonModule.setColor(color);
+                    mContinueButtonModule.setColor(color);
+                    mPauseButtonModule.setColor(accentColor);
+                    mChronographTicksModule.setScale(scale);
+                    mChronographClockModule.setScale(scale);
+                    mChronographClockModule.setValue(0);
+                    mChronographClockModule.setLapValue(-1);
+                    mChronographClockModule.setColor(accentColor);
+                    mChronographClockModule.setAccentColor(color);
                     mWatchFaceStyleBuilder.setHideStatusBar(true);
-                    mWatchFaceStyleBuilder.setAcceptsTapEvents(false);
                     setWatchFaceStyle(mWatchFaceStyleBuilder.build());
                     SETTINGS_MODE = 2;
                     break;
             }
 
-            if(SETTINGS_MODE > 1) {
+            if (SETTINGS_MODE > 1) {
                 mCalendar.set(Calendar.HOUR, 10);
                 mCalendar.set(Calendar.MINUTE, 10);
                 mCalendar.set(Calendar.SECOND, 30);
                 mCalendar.set(Calendar.MILLISECOND, 0);
             }
 
-            canvas.drawColor(Color.BLACK);
             for (Module module : mModules) {
                 if (module instanceof ComplicationModule) {
                     ((ComplicationModule) module).setCurrentTimeMillis(now);
                 }
-                module.draw(canvas);
             }
+
+            canvas.drawColor(Color.BLACK);
+            mChronographTicksModule.draw(canvas);
+            if (mTimer.isRunning()) {
+                if (mTimer.isPaused()) {
+                    mContinueButtonModule.draw(canvas);
+                    mStopButtonModule.draw(canvas);
+                } else {
+                    mTimer.update(mCalendar);
+                    mChronographClockModule.setValue(mTimer.getTime());
+                    mChronographClockModule.setLapValue(mTimer.getLapTime());
+                    mPauseButtonModule.draw(canvas);
+                    mLapButtonModule.draw(canvas);
+                }
+            } else {
+                mStartButtonModule.draw(canvas);
+                mRightComplicationModule.draw(canvas);
+            }
+            if (!mIsRound) {
+                mTopLeftComplicationModule.draw(canvas);
+                mTopRightComplicationModule.draw(canvas);
+                mBottomLeftComplicationModule.draw(canvas);
+                mBottomRightComplicationModule.draw(canvas);
+            }
+            mChronographClockModule.draw(canvas);
         }
 
         @Override
@@ -361,6 +442,9 @@ public class WatchFaceService extends CanvasWatchFaceService {
                 mCalendar.setTimeZone(TimeZone.getDefault());
                 invalidate();
             } else {
+                if (mTimer.isRunning() && !mTimer.isPaused()) {
+                    mTimer.pause(mCalendar);
+                }
                 unregisterReceiver();
             }
 

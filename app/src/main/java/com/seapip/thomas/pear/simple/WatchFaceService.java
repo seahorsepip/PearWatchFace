@@ -327,7 +327,6 @@ public class WatchFaceService extends CanvasWatchFaceService {
                 case 1:
                     setBounds();
                     mWatchFaceStyleBuilder.setHideStatusBar(false);
-                    mWatchFaceStyleBuilder.setAcceptsTapEvents(true);
                     setWatchFaceStyle(mWatchFaceStyleBuilder.build());
                     SETTINGS_MODE = 0;
                     break;
@@ -344,7 +343,6 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     mAnalogClockModule.setColor(accentColor);
                     mSimpleTicksModule.setStyle(mStyle);
                     mWatchFaceStyleBuilder.setHideStatusBar(true);
-                    mWatchFaceStyleBuilder.setAcceptsTapEvents(false);
                     setWatchFaceStyle(mWatchFaceStyleBuilder.build());
                     SETTINGS_MODE = 2;
                     break;

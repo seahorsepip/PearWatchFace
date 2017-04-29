@@ -34,7 +34,6 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
         super.onCreate(savedInstanceState);
 
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext().getApplicationContext());
-        final SharedPreferences.Editor editor = preferences.edit();
         adapter = new SettingsAdapter(getFragmentManager()) {
             @Override
             public ArrayList<SettingsRow> initPages() {
@@ -48,50 +47,69 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                 Rect insetBounds = new Rect(30, 30, width - 30, height - 30);
                 Rect screenBounds = new Rect(25, 25, width - 25, height - 25);
 
+                ArrayList<SettingsOverlay> timescaleModules = new ArrayList<>();
+                SettingsOverlay timescaleOverlay = new SettingsOverlay(bounds, bounds,
+                        "Timescale", Paint.Align.CENTER);
+                timescaleOverlay.setRunnable(new Runnable() {
+                    @Override
+                    public void run() {
+                        int scale = preferences.getInt("settings_chronograph_scale", 60);
+                        switch (scale) {
+                            case 3:
+                            case 30:
+                                scale *= 2;
+                                break;
+                            case 6:
+                                scale *= 5;
+                                break;
+                            case 60:
+                                scale /= 20;
+                                break;
+                        }
+                        preferences.edit().putInt("settings_chronograph_scale", scale).apply();
+                        setSettingsMode(true);
+                    }
+                });
+                timescaleOverlay.setRound(true);
+                timescaleOverlay.setInsetTitle(true);
+                timescaleOverlay.setActive(true);
+                timescaleModules.add(timescaleOverlay);
+
+                int offset = (int) (insetBounds.height() * 0.18f);
+                int size = (int) (insetBounds.width() * 0.20f);
                 ArrayList<SettingsOverlay> colorModules = new ArrayList<>();
-                SettingsOverlay colorOverlay = new SettingsOverlay(bounds, bounds,
+                SettingsOverlay colorOverlay = new SettingsOverlay(new Rect(insetBounds.left + offset,
+                        insetBounds.centerY() - size / 2,
+                        insetBounds.right - offset + size / 3,
+                        insetBounds.centerY() + size / 2), bounds,
                         "Color", Paint.Align.CENTER);
                 setColorOverlay(colorOverlay,
-                        "settings_color_color_name",
-                        "settings_color_color_value",
+                        "settings_chronograph_color_name",
+                        "settings_chronograph_color_value",
                         "Cyan",
                         Color.parseColor("#00BCD4"));
                 colorOverlay.setRound(WatchFaceService.ROUND);
-                colorOverlay.setInsetTitle(true);
                 colorOverlay.setActive(true);
                 colorModules.add(colorOverlay);
 
                 ArrayList<SettingsOverlay> accentColorModules = new ArrayList<>();
                 SettingsOverlay accentColorOverlay = new SettingsOverlay(
                         new Rect(bounds.centerX() - (int) (bounds.width() * 0.08f),
-                                bounds.bottom - (int) (bounds.height() * 0.60f),
+                                bounds.top,
                                 bounds.centerX() + (int) (bounds.width() * 0.08f),
-                                bounds.bottom),
+                                bounds.top + (int) (bounds.height() * 0.60f)),
                         bounds, "Color", Paint.Align.CENTER);
                 setColorOverlay(accentColorOverlay,
-                        "settings_color_accent_color_name",
-                        "settings_color_accent_color_value",
+                        "settings_chronograph_accent_color_name",
+                        "settings_chronograph_accent_color_value",
                         "Lime",
                         Color.parseColor("#CDDC39"));
                 accentColorOverlay.setRound(true);
+                accentColorOverlay.setBottomTitle(true);
                 accentColorOverlay.setActive(true);
                 accentColorModules.add(accentColorOverlay);
 
                 mComplicationModules = new ArrayList<>();
-                int offset = (int) (insetBounds.height() * 0.18f);
-                int size = (int) (insetBounds.width() * 0.20f);
-                SettingsOverlay topComplicationOverlay = new SettingsOverlay(
-                        new Rect(insetBounds.centerX() - size / 2,
-                                insetBounds.top + offset,
-                                insetBounds.centerX() + size / 2,
-                                insetBounds.top + offset + size),
-                        bounds,
-                        "Off",
-                        Paint.Align.CENTER);
-                setComplicationOverlay(topComplicationOverlay,
-                        WatchFaceService.class,
-                        WatchFaceService.COMPLICATION_IDS[0],
-                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[0]);
                 SettingsOverlay topLeftComplicationOverlay = new SettingsOverlay(
                         new Rect(screenBounds.left,
                                 screenBounds.top,
@@ -102,8 +120,8 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                         Paint.Align.LEFT);
                 setComplicationOverlay(topLeftComplicationOverlay,
                         WatchFaceService.class,
-                        WatchFaceService.COMPLICATION_IDS[1],
-                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[1]);
+                        WatchFaceService.COMPLICATION_IDS[0],
+                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[0]);
                 topLeftComplicationOverlay.setBottomTitle(true);
                 SettingsOverlay topRightComplicationOverlay = new SettingsOverlay(
                         new Rect(screenBounds.right - size,
@@ -115,50 +133,26 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                         Paint.Align.RIGHT);
                 setComplicationOverlay(topRightComplicationOverlay,
                         WatchFaceService.class,
-                        WatchFaceService.COMPLICATION_IDS[2],
-                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[2]);
+                        WatchFaceService.COMPLICATION_IDS[1],
+                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[1]);
                 topRightComplicationOverlay.setBottomTitle(true);
-                if(WatchFaceService.ROUND) {
-                    topComplicationOverlay.setActive(true);
-                } else {
-                    topLeftComplicationOverlay.setActive(true);
-                }
-                SettingsOverlay leftComplicationOverlay = new SettingsOverlay(
-                        new Rect(insetBounds.left + offset,
-                                insetBounds.centerY() - size / 2,
-                                insetBounds.left + offset + size,
-                                insetBounds.centerY() + size / 2),
-                        bounds,
-                        "Off",
-                        Paint.Align.LEFT);
-                setComplicationOverlay(leftComplicationOverlay,
-                        WatchFaceService.class,
-                        WatchFaceService.COMPLICATION_IDS[3],
-                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[3]);
                 SettingsOverlay rightComplicationOverlay = new SettingsOverlay(
-                        new Rect(insetBounds.right - offset - size,
+                        new Rect(insetBounds.right - offset - size - size / 3,
                                 insetBounds.centerY() - size / 2,
-                                insetBounds.right - offset,
+                                insetBounds.right - offset + size / 3,
                                 insetBounds.centerY() + size / 2),
                         bounds,
                         "Off",
                         Paint.Align.RIGHT);
                 setComplicationOverlay(rightComplicationOverlay,
                         WatchFaceService.class,
-                        WatchFaceService.COMPLICATION_IDS[4],
-                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[4]);
-                SettingsOverlay bottomComplicationOverlay = new SettingsOverlay(
-                        new Rect(insetBounds.centerX() - size / 2,
-                                insetBounds.bottom - offset - size,
-                                insetBounds.centerX() + size / 2,
-                                insetBounds.bottom - offset),
-                        bounds,
-                        "Off",
-                        Paint.Align.CENTER);
-                setComplicationOverlay(bottomComplicationOverlay,
-                        WatchFaceService.class,
-                        WatchFaceService.COMPLICATION_IDS[5],
-                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[5]);
+                        WatchFaceService.COMPLICATION_IDS[2],
+                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[2]);
+                if(WatchFaceService.ROUND) {
+                    rightComplicationOverlay.setActive(true);
+                } else {
+                    topLeftComplicationOverlay.setActive(true);
+                }
                 SettingsOverlay bottomLeftComplicationOverlay = new SettingsOverlay(
                         new Rect(screenBounds.left,
                                 screenBounds.bottom - size,
@@ -169,8 +163,8 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                         Paint.Align.LEFT);
                 setComplicationOverlay(bottomLeftComplicationOverlay,
                         WatchFaceService.class,
-                        WatchFaceService.COMPLICATION_IDS[6],
-                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[6]);
+                        WatchFaceService.COMPLICATION_IDS[3],
+                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[3]);
                 SettingsOverlay bottomRightComplicationOverlay = new SettingsOverlay(
                         new Rect(screenBounds.right - size,
                                 screenBounds.bottom - size,
@@ -181,20 +175,17 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                         Paint.Align.RIGHT);
                 setComplicationOverlay(bottomRightComplicationOverlay,
                         WatchFaceService.class,
-                        WatchFaceService.COMPLICATION_IDS[7],
-                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[7]);
+                        WatchFaceService.COMPLICATION_IDS[4],
+                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[4]);
                 if(WatchFaceService.ROUND) {
                     topLeftComplicationOverlay.setDisabled(true);
                     topRightComplicationOverlay.setDisabled(true);
                     bottomLeftComplicationOverlay.setDisabled(true);
                     bottomRightComplicationOverlay.setDisabled(true);
                 }
-                mComplicationModules.add(topComplicationOverlay);
                 mComplicationModules.add(topLeftComplicationOverlay);
                 mComplicationModules.add(topRightComplicationOverlay);
-                mComplicationModules.add(leftComplicationOverlay);
                 mComplicationModules.add(rightComplicationOverlay);
-                mComplicationModules.add(bottomComplicationOverlay);
                 mComplicationModules.add(bottomLeftComplicationOverlay);
                 mComplicationModules.add(bottomRightComplicationOverlay);
 
@@ -211,6 +202,7 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                 finishModules.add(finishOverlay);
 
                 SettingsRow row = new SettingsRow();
+                row.addPages(new SettingsPage(timescaleModules));
                 row.addPages(new SettingsPage(colorModules));
                 row.addPages(new SettingsPage(accentColorModules));
                 row.addPages(new SettingsPage(mComplicationModules));

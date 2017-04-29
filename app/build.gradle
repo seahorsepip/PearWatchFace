@@ -4,11 +4,11 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
-        applicationId "com.seapip.thomas.pear"
+        applicationId "com.seapip.thomas.pear_watchface"
         minSdkVersion 25
         targetSdkVersion 25
-        versionCode 4
-        versionName "2.0.1"
+        versionCode 1
+        versionName "2.0.0"
     }
     buildTypes {
         release {

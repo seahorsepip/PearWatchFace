@@ -14,8 +14,6 @@ public class UtilityTicksModule implements Module {
     /* Paint */
     private Paint mSecondsTickPaint;
     private Paint mMinuteTickPaint;
-    private Paint mHourTickPaint;
-    private Paint mHollowHourTickPaint;
     private Paint mHourTextPaint;
     private Paint mSecondsTextPaint;
 
@@ -27,10 +25,6 @@ public class UtilityTicksModule implements Module {
         mMinuteTickPaint = new Paint();
         mMinuteTickPaint.setAntiAlias(true);
         mMinuteTickPaint.setColor(Color.WHITE);
-        mHourTickPaint = new Paint();
-        mHourTickPaint.setAntiAlias(true);
-        mHourTickPaint.setStrokeCap(Paint.Cap.ROUND);
-        mHourTickPaint.setColor(Color.parseColor("#b2b2b2"));
         mHourTextPaint = new Paint();
         mHourTextPaint.setAntiAlias(true);
         mHourTextPaint.setColor(Color.WHITE);
@@ -45,12 +39,11 @@ public class UtilityTicksModule implements Module {
     public void setBounds(Rect bounds) {
         mBounds = bounds;
         mSecondsTickPaint.setStrokeWidth(bounds.width() * 0.005f);
-        mMinuteTickPaint.setStrokeWidth(bounds.width() * 0.02f);
-        int stroke = (int) (bounds.width() * 0.026f);
+        int stroke = (int) (bounds.width() * 0.02f);
         if (stroke % 2 != 0) {
             stroke--;
         }
-        mHourTickPaint.setStrokeWidth(stroke);
+        mMinuteTickPaint.setStrokeWidth(stroke);
         mHourTextPaint.setTextSize(bounds.width() * 0.12f);
         mSecondsTextPaint.setTextSize(bounds.width() * 0.04f);
     }

@@ -149,6 +149,30 @@
         </service>
 
         <service
+            android:name=".chronograph.WatchFaceService"
+            android:label="@string/name_chronograph"
+            android:permission="android.permission.BIND_WALLPAPER">
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/watch_face" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview"
+                android:resource="@drawable/preview_simple" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview_circular"
+                android:resource="@drawable/preview_simple" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.wearableConfigurationAction"
+                android:value="com.seapip.thomas.pear_watchface.chronograph.CONFIG" />
+
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+
+                <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
+            </intent-filter>
+        </service>
+
+        <service
             android:name=".provider.DateProviderService"
             android:icon="@mipmap/ic_launcher"
             android:label="Date"
@@ -236,6 +260,18 @@
             android:theme="@style/Theme.Transparent">
             <intent-filter>
                 <action android:name="com.seapip.thomas.pear_watchface.utility.CONFIG" />
+
+                <category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".chronograph.SettingsActivity"
+            android:label="Settings"
+            android:theme="@style/Theme.Transparent">
+            <intent-filter>
+                <action android:name="com.seapip.thomas.pear_watchface.chronograph.CONFIG" />
 
                 <category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />

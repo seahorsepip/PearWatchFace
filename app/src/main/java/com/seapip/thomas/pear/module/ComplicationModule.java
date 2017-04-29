@@ -28,12 +28,13 @@ public class ComplicationModule implements Module {
     private boolean mRangeValue = false;
 
     /* Paint */
-    private Paint backgroundPaint;
     private Paint mRangeCirclePaint;
     private Paint mRangeArcPaint;
     private Paint mRangeValuePaint;
     private Paint mShortTextTitlePaint;
     private Paint mShortTextTextPaint;
+    private Paint mShortTextHorizontalTitlePaint;
+    private Paint mShortTextHorizontalTextPaint;
     private Paint mLongTextTitlePaint;
     private Paint mLongTextTextPaint;
     private Paint mSmallImageOverlayPaint;
@@ -42,8 +43,6 @@ public class ComplicationModule implements Module {
         mContext = context;
 
         /* Paint */
-        backgroundPaint = new Paint();
-        backgroundPaint.setColor(Color.argb(20, 0, 255, 0));
         mRangeCirclePaint = new Paint();
         mRangeCirclePaint.setAntiAlias(true);
         mRangeCirclePaint.setStyle(Paint.Style.STROKE);
@@ -61,6 +60,13 @@ public class ComplicationModule implements Module {
         mShortTextTextPaint = new Paint();
         mShortTextTextPaint.setAntiAlias(true);
         mShortTextTextPaint.setTextAlign(Paint.Align.CENTER);
+        mShortTextHorizontalTitlePaint = new Paint();
+        mShortTextHorizontalTitlePaint.setAntiAlias(true);
+        mShortTextHorizontalTitlePaint.setColor(Color.WHITE);
+        mShortTextHorizontalTitlePaint.setTextAlign(Paint.Align.LEFT);
+        mShortTextHorizontalTextPaint = new Paint();
+        mShortTextHorizontalTextPaint.setAntiAlias(true);
+        mShortTextHorizontalTextPaint.setTextAlign(Paint.Align.RIGHT);
         mLongTextTitlePaint = new Paint();
         mLongTextTitlePaint.setAntiAlias(true);
         mLongTextTextPaint = new Paint();
@@ -89,7 +95,11 @@ public class ComplicationModule implements Module {
                     drawRangedValue(canvas);
                     break;
                 case ComplicationData.TYPE_SHORT_TEXT:
-                    drawShortText(canvas);
+                    if(mBounds.width() > mBounds.height()) {
+                        drawShortTextHorizontal(canvas);
+                    } else {
+                        drawShortText(canvas);
+                    }
                     break;
                 case ComplicationData.TYPE_LONG_TEXT:
                     drawLongText(canvas);
@@ -145,6 +155,39 @@ public class ComplicationModule implements Module {
                 drawable.draw(canvas);
             }
         }
+    }
+
+    private void drawShortTextHorizontal(Canvas canvas) {
+        ComplicationText title = mComplicationData.getShortTitle();
+        ComplicationText text = mComplicationData.getShortText();
+        String textString = text.getText(mContext, mCurrentTimeMillis).toString().toUpperCase();
+        float padding = 0.18f * mBounds.height();
+
+        if (title != null) {
+            String titleString = title.getText(mContext, mCurrentTimeMillis).toString().toUpperCase();
+            if(titleString.length() > 3) {
+                drawShortText(canvas);
+                return;
+            }
+            float titleWidth = mLongTextTitlePaint.measureText(titleString, 0, titleString.length());
+            float textWidth = mLongTextTitlePaint.measureText(textString, 0, textString.length());
+            float center = textWidth / (titleWidth + textWidth) * (mBounds.width() * 0.9f - padding * 2);
+            float scale = center / textWidth;
+            mShortTextHorizontalTitlePaint.setTextSize(mLongTextTitlePaint.getTextSize() * scale);
+            mShortTextHorizontalTextPaint.setTextSize(mLongTextTitlePaint.getTextSize() * scale);
+            float y = mBounds.centerY() - (mShortTextHorizontalTextPaint.descent() + mShortTextHorizontalTextPaint.ascent()) / 2;
+            canvas.drawText(titleString,
+                    mBounds.left + padding,
+                    y,
+                    mShortTextHorizontalTitlePaint);
+            canvas.drawText(textString,
+                    mBounds.right - padding,
+                    y,
+                    mShortTextHorizontalTextPaint);
+        } else {
+            drawShortText(canvas);
+        }
+
     }
 
     private void drawShortText(Canvas canvas) {
@@ -256,6 +299,7 @@ public class ComplicationModule implements Module {
         mRangeArcPaint.setColor(color);
         mRangeValuePaint.setColor(color);
         mShortTextTextPaint.setColor(color);
+        mShortTextHorizontalTextPaint.setColor(color);
         mLongTextTitlePaint.setColor(color);
         mSmallImageOverlayPaint.setColor(Color.argb(128,
                 Color.red(color),

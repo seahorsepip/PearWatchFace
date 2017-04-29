@@ -34,7 +34,6 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
         super.onCreate(savedInstanceState);
 
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext().getApplicationContext());
-        final SharedPreferences.Editor editor = preferences.edit();
         adapter = new SettingsAdapter(getFragmentManager()) {
             @Override
             public ArrayList<SettingsRow> initPages() {

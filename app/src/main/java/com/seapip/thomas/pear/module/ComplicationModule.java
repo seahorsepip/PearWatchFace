@@ -37,7 +37,6 @@ public class ComplicationModule implements Module {
     private Paint mShortTextHorizontalTextPaint;
     private Paint mLongTextTitlePaint;
     private Paint mLongTextTextPaint;
-    private Paint mSmallImageOverlayPaint;
 
     public ComplicationModule(Context context) {
         mContext = context;
@@ -72,8 +71,6 @@ public class ComplicationModule implements Module {
         mLongTextTextPaint = new Paint();
         mLongTextTextPaint.setAntiAlias(true);
         mLongTextTextPaint.setColor(Color.WHITE);
-        mSmallImageOverlayPaint = new Paint();
-        mSmallImageOverlayPaint.setAntiAlias(true);
     }
 
     @Override
@@ -259,17 +256,15 @@ public class ComplicationModule implements Module {
             Drawable drawable = icon.loadDrawable(mContext);
             if (drawable != null) {
                 int size = (int) (mBounds.height() * 0.64);
-                if(mComplicationData.getImageStyle() == ComplicationData.IMAGE_STYLE_PHOTO) {
+                if(mAmbient) {
                     drawable = DrawableTools.convertToGrayscale(drawable);
+                }
+                if(mComplicationData.getImageStyle() == ComplicationData.IMAGE_STYLE_PHOTO) {
                     drawable = DrawableTools.convertToCircle(drawable);
                 }
                 drawable.setBounds(mBounds.centerX() - size / 2, mBounds.centerY() - size / 2,
                         mBounds.centerX() + size / 2, mBounds.centerY() + size / 2);
                 drawable.draw(canvas);
-                if(mComplicationData.getImageStyle() == ComplicationData.IMAGE_STYLE_PHOTO) {
-                    canvas.drawCircle(mBounds.centerX(), mBounds.centerY(),
-                            mBounds.height() * 0.32f, mSmallImageOverlayPaint);
-                }
             }
         }
     }
@@ -301,10 +296,6 @@ public class ComplicationModule implements Module {
         mShortTextTextPaint.setColor(color);
         mShortTextHorizontalTextPaint.setColor(color);
         mLongTextTitlePaint.setColor(color);
-        mSmallImageOverlayPaint.setColor(Color.argb(128,
-                Color.red(color),
-                Color.green(color),
-                Color.blue(color)));
     }
 
     public void setComplicationData(ComplicationData complicationData) {

@@ -348,7 +348,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     break;
             }
 
-            if (SETTINGS_MODE > 1) {
+            if (SETTINGS_MODE > -1) {
                 mCalendar.set(Calendar.HOUR, 10);
                 mCalendar.set(Calendar.MINUTE, 10);
                 mCalendar.set(Calendar.SECOND, 30);

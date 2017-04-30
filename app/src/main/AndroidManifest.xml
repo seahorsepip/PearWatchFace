@@ -174,8 +174,8 @@
 
         <service
             android:name=".provider.DateProviderService"
-            android:icon="@mipmap/ic_launcher"
-            android:label="Date"
+            android:icon="@drawable/ic_date_week"
+            android:label="Date of week"
             android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
             <intent-filter>
                 <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
@@ -191,8 +191,8 @@
 
         <service
             android:name=".provider.SimpleDateProviderService"
-            android:icon="@mipmap/ic_launcher"
-            android:label="Simple date"
+            android:icon="@drawable/ic_date"
+            android:label="Date"
             android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
             <intent-filter>
                 <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />

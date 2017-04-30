@@ -168,7 +168,7 @@ public class ComplicationModule implements Module {
             }
             float titleWidth = mLongTextTitlePaint.measureText(titleString, 0, titleString.length());
             float textWidth = mLongTextTitlePaint.measureText(textString, 0, textString.length());
-            float center = textWidth / (titleWidth + textWidth) * (mBounds.width() * 0.9f - padding * 2);
+            float center = textWidth / (titleWidth + textWidth) * (mBounds.width() * 0.95f - padding * 2);
             float scale = center / textWidth;
             mShortTextHorizontalTitlePaint.setTextSize(mLongTextTitlePaint.getTextSize() * scale);
             mShortTextHorizontalTextPaint.setTextSize(mLongTextTitlePaint.getTextSize() * scale);

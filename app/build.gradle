@@ -7,8 +7,8 @@ android {
         applicationId "com.seapip.thomas.pear_watchface"
         minSdkVersion 25
         targetSdkVersion 25
-        versionCode 2
-        versionName "2.0.1"
+        versionCode 4
+        versionName "2.1.0"
     }
     buildTypes {
         release {
@@ -20,8 +20,8 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    provided 'com.google.android.wearable:wearable:2.0.0'
-    compile 'com.google.android.support:wearable:2.0.0'
-    compile 'com.google.android.gms:play-services-wearable:10.2.0'
+    provided 'com.google.android.wearable:wearable:2.0.1'
+    compile 'com.google.android.support:wearable:2.0.1'
+    compile 'com.google.android.gms:play-services-wearable:10.2.4'
     compile 'org.jraf:android-wear-color-picker:1.0.1'
 }

@@ -294,9 +294,6 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     break;
             }
 
-            mCalendar.set(Calendar.HOUR, 10);
-            mCalendar.set(Calendar.MINUTE, 9);
-
             canvas.drawColor(Color.BLACK);
             for (Module module : mModules) {
                 if (module instanceof ComplicationModule) {

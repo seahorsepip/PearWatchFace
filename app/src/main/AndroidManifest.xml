@@ -181,10 +181,10 @@
                 android:resource="@xml/watch_face" />
             <meta-data
                 android:name="com.google.android.wearable.watchface.preview"
-                android:resource="@drawable/preview_chronograph" />
+                android:resource="@drawable/preview_sport_digital" />
             <meta-data
                 android:name="com.google.android.wearable.watchface.preview_circular"
-                android:resource="@drawable/preview_chronograph" />
+                android:resource="@drawable/preview_sport_digital_circular" />
             <meta-data
                 android:name="com.google.android.wearable.watchface.wearableConfigurationAction"
                 android:value="com.seapip.thomas.pear_watchface.sport_digital.CONFIG" />

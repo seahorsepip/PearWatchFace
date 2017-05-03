@@ -1,4 +1,4 @@
-package com.seapip.thomas.pear.motion;
+package com.seapip.thomas.pear.sport_digital;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -20,11 +21,10 @@ import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
+import com.seapip.thomas.pear.R;
 import com.seapip.thomas.pear.module.ComplicationModule;
-import com.seapip.thomas.pear.module.MotionModule;
-import com.seapip.thomas.pear.module.MotionDateModule;
-import com.seapip.thomas.pear.module.DigitalClockModule;
 import com.seapip.thomas.pear.module.Module;
+import com.seapip.thomas.pear.module.SportDigitalClockModule;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -40,15 +40,15 @@ public class WatchFaceService extends CanvasWatchFaceService {
     };
     public static final int MODULE_SPACING = 10;
 
-    private static final int BOTTOM_LEFT_COMPLICATION = 0;
-    private static final int BOTTOM_CENTER_COMPLICATION = 1;
-    private static final int BOTTOM_RIGHT_COMPLICATION = 2;
+    private static final int TOP_LEFT_COMPLICATION = 0;
+    private static final int CENTER_LEFT_COMPLICATION = 1;
+    private static final int BOTTOM_LEFT_COMPLICATION = 2;
     public static final int[] COMPLICATION_IDS = {
-            BOTTOM_LEFT_COMPLICATION,
-            BOTTOM_CENTER_COMPLICATION,
-            BOTTOM_RIGHT_COMPLICATION
+            TOP_LEFT_COMPLICATION,
+            CENTER_LEFT_COMPLICATION,
+            BOTTOM_LEFT_COMPLICATION
     };
-    public static final long INTERACTIVE_UPDATE_RATE_MS = 20;
+    private static final long INTERACTIVE_UPDATE_RATE_MS = 32;
     private static final int MSG_UPDATE_TIME = 0;
 
     public static int SETTINGS_MODE = 0;
@@ -105,12 +105,10 @@ public class WatchFaceService extends CanvasWatchFaceService {
 
         /*Modules */
         private ArrayList<Module> mModules;
-        private MotionModule mMotionModule;
+        private ComplicationModule mTopLeftComplicationModule;
+        private ComplicationModule mCenterLeftComplicationModule;
         private ComplicationModule mBottomLeftComplicationModule;
-        private ComplicationModule mBottomCenterComplicationModule;
-        private ComplicationModule mBottomRightComplicationModule;
-        private DigitalClockModule mDigitalClockModule;
-        private MotionDateModule mMotionDateModule;
+        private SportDigitalClockModule mSportDigitalClockModule;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -128,27 +126,26 @@ public class WatchFaceService extends CanvasWatchFaceService {
 
             setActiveComplications(COMPLICATION_IDS);
 
-            int date = mPrefs.getInt("settings_motion_date", 0);
-            int scene = mPrefs.getInt("settings_motion_scene", 0);
+            int style = mPrefs.getInt("settings_sport_digital_style", 0);
+            int colorStyle = mPrefs.getInt("settings_sport_digital_color_style", 0);
 
-            mMotionModule = new MotionModule(context, scene);
+            mTopLeftComplicationModule = new ComplicationModule(context);
+            mCenterLeftComplicationModule = new ComplicationModule(context);
             mBottomLeftComplicationModule = new ComplicationModule(context);
-            mBottomCenterComplicationModule = new ComplicationModule(context);
-            mBottomRightComplicationModule = new ComplicationModule(context);
-            mDigitalClockModule = new DigitalClockModule(mCalendar, true);
-            mMotionDateModule = new MotionDateModule(mCalendar, date);
+            mSportDigitalClockModule = new SportDigitalClockModule(context, mCalendar, true, style);
 
             mModules = new ArrayList<>();
+            mModules.add(mTopLeftComplicationModule);
+            mModules.add(mCenterLeftComplicationModule);
             mModules.add(mBottomLeftComplicationModule);
-            mModules.add(mBottomCenterComplicationModule);
-            mModules.add(mBottomRightComplicationModule);
-            mModules.add(mMotionModule);
-            mModules.add(mDigitalClockModule);
-            mModules.add(mMotionDateModule);
+            mModules.add(mSportDigitalClockModule);
 
+            int color = mPrefs.getInt("settings_sport_digital_color_value",
+                    Color.parseColor("#CDDC39"));
             for (Module module : mModules) {
-                module.setColor(Color.WHITE);
+                module.setColor(color);
             }
+            mSportDigitalClockModule.setColor(colorStyle == 0 ? color : Color.WHITE);
         }
 
         @Override
@@ -172,6 +169,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
             ((ComplicationModule) mModules.get(complicationId)).setComplicationData(complicationData);
             invalidate();
         }
+
 
         @Override
         public void onTimeTick() {
@@ -213,37 +211,31 @@ public class WatchFaceService extends CanvasWatchFaceService {
 
             Rect bounds = new Rect(inset, inset, mWidth - inset, mHeight - inset);
 
-            mMotionModule.setBounds(new Rect(0, 0, mWidth, mHeight));
+            mTopLeftComplicationModule.setBounds(new Rect(
+                    bounds.left,
+                    bounds.top,
+                    bounds.left + (bounds.width() - MODULE_SPACING * 2) / 3,
+                    bounds.top + (bounds.height() - MODULE_SPACING * 2) / 3)
+            );
+            mCenterLeftComplicationModule.setBounds(new Rect(
+                    bounds.left,
+                    bounds.top + (bounds.height() - MODULE_SPACING * 2) / 3 + MODULE_SPACING,
+                    bounds.left + (bounds.width() - MODULE_SPACING * 2) / 3,
+                    bounds.bottom - (bounds.height() - MODULE_SPACING * 2) / 3 - MODULE_SPACING)
+            );
             mBottomLeftComplicationModule.setBounds(new Rect(
                     bounds.left,
                     bounds.bottom - (bounds.height() - MODULE_SPACING * 2) / 3,
                     bounds.left + (bounds.width() - MODULE_SPACING * 2) / 3,
                     bounds.bottom)
             );
-            mBottomCenterComplicationModule.setBounds(new Rect(
-                    bounds.left + (bounds.width() - MODULE_SPACING * 2) / 3 + MODULE_SPACING,
-                    bounds.bottom - (bounds.height() - MODULE_SPACING * 2) / 3,
-                    bounds.right - (bounds.width() - MODULE_SPACING * 2) / 3 - MODULE_SPACING,
-                    bounds.bottom
-            ));
-            mBottomRightComplicationModule.setBounds(new Rect(
-                    bounds.right - (bounds.width() - MODULE_SPACING * 2) / 3,
-                    bounds.bottom - (bounds.height() - MODULE_SPACING * 2) / 3,
-                    bounds.right,
-                    bounds.bottom)
-            );
-            mDigitalClockModule.setBounds(new Rect(
+            mSportDigitalClockModule.setBounds(new Rect(
                     bounds.right - (bounds.width() - MODULE_SPACING * 2) / 3 * 2 - MODULE_SPACING,
                     bounds.top,
                     bounds.right,
-                    bounds.top + bounds.height() / 3 - MODULE_SPACING / 2)
+                    bounds.bottom)
             );
-            mMotionDateModule.setBounds(new Rect(
-                    bounds.left + MODULE_SPACING * 2,
-                    bounds.top + bounds.height() / 3 - MODULE_SPACING / 2 * 3,
-                    bounds.right,
-                    bounds.bottom - (bounds.height() - MODULE_SPACING * 2) / 3 - 3 * MODULE_SPACING)
-            );
+
         }
 
         @Override
@@ -257,12 +249,10 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     break;
                 case TAP_TYPE_TAP:
                     // The user has completed the tap gesture.
-                    boolean tapped = false;
                     for (Module module : mModules) {
                         if (module instanceof ComplicationModule &&
                                 ((ComplicationModule) module).contains(x, y)) {
                             PendingIntent intent = ((ComplicationModule) module).getTapAction();
-                            tapped = true;
                             if (intent != null) {
                                 try {
                                     intent.send();
@@ -270,9 +260,6 @@ public class WatchFaceService extends CanvasWatchFaceService {
                                 }
                             }
                         }
-                    }
-                    if(!tapped) {
-                        mMotionModule.tap(x, y);
                     }
                     break;
             }
@@ -292,30 +279,31 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     SETTINGS_MODE = 0;
                     break;
                 case 3:
+                    int style = mPrefs.getInt("settings_sport_digital_style", 0);
+                    int colorStyle = mPrefs.getInt("settings_sport_digital_color_style", 0);
+                    int color = mPrefs.getInt("settings_sport_digital_color_value", Color.parseColor("#CDDC39"));
+                    for (Module module : mModules) {
+                        module.setColor(color);
+                    }
+                    mSportDigitalClockModule.setStyle(style);
+                    mSportDigitalClockModule.setColor(colorStyle == 0 ? color : Color.WHITE);
                     setBounds();
-                    int date = mPrefs.getInt("settings_motion_date", 0);
-                    int scene = mPrefs.getInt("settings_motion_scene", 0);
-                    mMotionDateModule.setDate(date);
-                    mMotionModule.setScene(scene);
                     mWatchFaceStyleBuilder.setHideStatusBar(true);
                     setWatchFaceStyle(mWatchFaceStyleBuilder.build());
                     SETTINGS_MODE = 2;
                     break;
             }
 
+            mCalendar.set(Calendar.HOUR, 10);
+            mCalendar.set(Calendar.MINUTE, 9);
+
             canvas.drawColor(Color.BLACK);
             for (Module module : mModules) {
                 if (module instanceof ComplicationModule) {
                     ((ComplicationModule) module).setCurrentTimeMillis(now);
                 }
+                module.draw(canvas);
             }
-
-            mMotionModule.draw(canvas);
-            mBottomLeftComplicationModule.draw(canvas);
-            mBottomCenterComplicationModule.draw(canvas);
-            mBottomRightComplicationModule.draw(canvas);
-            mDigitalClockModule.draw(canvas);
-            mMotionDateModule.draw(canvas);
         }
 
         @Override
@@ -330,7 +318,6 @@ public class WatchFaceService extends CanvasWatchFaceService {
             } else {
                 unregisterReceiver();
             }
-            mMotionModule.setAmbient(mAmbient);
 
             /* Check and trigger whether or not timer should be running (only in active mode). */
             updateTimer();

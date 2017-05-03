@@ -65,6 +65,7 @@ public class SettingsActivity extends Activity {
         intent.putExtra("color_values_id", R.array.color_values);
         settingsOverlay.setIntent(intent);
         settingsOverlay.setTitle(preferences.getString(nameKey, defaultName));
+        final Runnable runnable = settingsOverlay.getRunnable();
         settingsOverlay.setRunnable(new Runnable() {
             @Override
             public void run() {
@@ -76,6 +77,9 @@ public class SettingsActivity extends Activity {
                 editor.apply();
                 intent.putExtra("color", value);
                 settingsOverlay.setTitle(name);
+                if(runnable != null) {
+                    runnable.run();
+                }
                 setSettingsMode(true);
             }
         });
@@ -92,6 +96,7 @@ public class SettingsActivity extends Activity {
                         watchFaceService),
                 id,
                 supportedTypes));
+        final Runnable runnable = settingsOverlay.getRunnable();
         settingsOverlay.setRunnable(new Runnable() {
             @Override
             public void run() {
@@ -105,7 +110,9 @@ public class SettingsActivity extends Activity {
                     }
                 }
                 settingsOverlay.setTitle(title);
-                return;
+                if(runnable != null) {
+                    runnable.run();
+                }
             }
         });
     }

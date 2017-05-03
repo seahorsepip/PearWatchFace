@@ -173,6 +173,30 @@
         </service>
 
         <service
+            android:name=".sport_digital.WatchFaceService"
+            android:label="Pear Sport+ Digital"
+            android:permission="android.permission.BIND_WALLPAPER">
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/watch_face" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview"
+                android:resource="@drawable/preview_chronograph" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview_circular"
+                android:resource="@drawable/preview_chronograph" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.wearableConfigurationAction"
+                android:value="com.seapip.thomas.pear_watchface.sport_digital.CONFIG" />
+
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+
+                <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
+            </intent-filter>
+        </service>
+
+        <service
             android:name=".provider.DateProviderService"
             android:icon="@drawable/ic_date_week"
             android:label="Date of week"
@@ -272,6 +296,18 @@
             android:theme="@style/Theme.Transparent">
             <intent-filter>
                 <action android:name="com.seapip.thomas.pear_watchface.chronograph.CONFIG" />
+
+                <category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".sport_digital.SettingsActivity"
+            android:label="Settings"
+            android:theme="@style/Theme.Transparent">
+            <intent-filter>
+                <action android:name="com.seapip.thomas.pear_watchface.sport_digital.CONFIG" />
 
                 <category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />

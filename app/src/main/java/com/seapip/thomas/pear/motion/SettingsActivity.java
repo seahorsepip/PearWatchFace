@@ -1,10 +1,15 @@
 package com.seapip.thomas.pear.motion;
 
+import android.content.ComponentName;
 import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.wearable.complications.ComplicationProviderInfo;
+import android.support.wearable.complications.ProviderInfoRetriever;
 import android.support.wearable.view.GridViewPager;
 import android.util.DisplayMetrics;
 
@@ -16,9 +21,12 @@ import com.seapip.thomas.pear.settings.SettingsPage;
 import com.seapip.thomas.pear.settings.SettingsRow;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 
 public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsActivity {
     private SettingsAdapter adapter;
+    private ArrayList<SettingsOverlay> mComplicationModules;
+    private ProviderInfoRetriever mProviderInfoRetriever;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,6 +146,49 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                 dateOverlay.setActive(true);
                 dateModules.add(dateOverlay);
 
+                int spacing = WatchFaceService.MODULE_SPACING - 2;
+                mComplicationModules = new ArrayList<>();
+                SettingsOverlay complicationBottomLeftOverlay = new SettingsOverlay(
+                        new Rect(bounds.left,
+                                bounds.bottom - (bounds.height() - spacing * 2) / 3,
+                                bounds.left + (bounds.width() - spacing * 2) / 3,
+                                bounds.bottom),
+                        bounds,
+                        "OFF",
+                        Paint.Align.LEFT);
+                setComplicationOverlay(complicationBottomLeftOverlay,
+                        WatchFaceService.class,
+                        WatchFaceService.COMPLICATION_IDS[0],
+                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[0]);
+                SettingsOverlay complicationBottomCenterOverlay = new SettingsOverlay(
+                        new Rect(bounds.left + (bounds.width() - spacing * 2) / 3 + spacing,
+                                bounds.bottom - (bounds.height() - spacing * 2) / 3,
+                                bounds.right - (bounds.width() - spacing * 2) / 3 - spacing,
+                                bounds.bottom),
+                        bounds,
+                        "OFF",
+                        Paint.Align.CENTER);
+                setComplicationOverlay(complicationBottomCenterOverlay,
+                        WatchFaceService.class,
+                        WatchFaceService.COMPLICATION_IDS[1],
+                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[1]);
+                SettingsOverlay complicationBottomRightOverlay = new SettingsOverlay(
+                        new Rect(bounds.right - (bounds.width() - spacing * 2) / 3,
+                                bounds.bottom - (bounds.height() - spacing * 2) / 3,
+                                bounds.right,
+                                bounds.bottom),
+                        bounds,
+                        "OFF",
+                        Paint.Align.RIGHT);
+                setComplicationOverlay(complicationBottomRightOverlay,
+                        WatchFaceService.class,
+                        WatchFaceService.COMPLICATION_IDS[2],
+                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[2]);
+                mComplicationModules.add(complicationBottomLeftOverlay);
+                mComplicationModules.add(complicationBottomCenterOverlay);
+                mComplicationModules.add(complicationBottomRightOverlay);
+                complicationBottomLeftOverlay.setActive(true);
+
                 ArrayList<SettingsOverlay> finishModules = new ArrayList<>();
                 SettingsFinish finishOverlay = new SettingsFinish(getApplicationContext(),
                         new Rect(0, 0, width, height));
@@ -153,6 +204,7 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                 SettingsRow row = new SettingsRow();
                 row.addPages(new SettingsPage(backgroundModules));
                 row.addPages(new SettingsPage(dateModules));
+                row.addPages(new SettingsPage(mComplicationModules));
                 row.addPages(new SettingsPage(finishModules));
                 pages.add(row);
 
@@ -160,7 +212,36 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
             }
         };
         ((GridViewPager) findViewById(R.id.pager)).setAdapter(adapter);
+
+        mProviderInfoRetriever = new ProviderInfoRetriever(getApplicationContext(), new Executor() {
+            @Override
+            public void execute(@NonNull Runnable r) {
+                new Thread(r).start();
+            }
+        });
+        mProviderInfoRetriever.init();
+        mProviderInfoRetriever.retrieveProviderInfo(
+                new ProviderInfoRetriever.OnProviderInfoReceivedCallback() {
+                    @Override
+                    public void onProviderInfoReceived(int i, @Nullable ComplicationProviderInfo complicationProviderInfo) {
+                        String title = "OFF";
+                        if (complicationProviderInfo != null) {
+                            title = complicationProviderInfo.providerName;
+                        }
+                        mComplicationModules.get(i).setTitle(title);
+                    }
+
+                },
+                new ComponentName(getApplicationContext(), WatchFaceService.class),
+                WatchFaceService.COMPLICATION_IDS
+        );
         setSettingsMode(true);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mProviderInfoRetriever.release();
     }
 
     @Override

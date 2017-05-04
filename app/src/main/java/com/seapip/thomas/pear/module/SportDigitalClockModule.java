@@ -2,7 +2,6 @@ package com.seapip.thomas.pear.module;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -33,8 +32,7 @@ public class SportDigitalClockModule implements Module {
         mStyle = style;
 
         /* Fonts */
-        mFontBold = Typeface.createFromAsset(mContext.getAssets(),
-                "fonts/Sport.ttf");
+        mFontBold = Typeface.createFromAsset(mContext.getAssets(), "fonts/Sport.ttf");
 
         /* Paint */
         mHourTextPaint = new Paint();
@@ -42,13 +40,11 @@ public class SportDigitalClockModule implements Module {
         mHourTextPaint.setTextAlign(Paint.Align.RIGHT);
         mHourTextPaint.setTypeface(mFontBold);
         mHourTextPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        mHourTextPaint.setLetterSpacing(-0.03f);
         mMinuteTextPaint = new Paint();
         mMinuteTextPaint.setAntiAlias(true);
         mMinuteTextPaint.setTextAlign(Paint.Align.RIGHT);
         mMinuteTextPaint.setTypeface(mFontBold);
         mMinuteTextPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        mMinuteTextPaint.setLetterSpacing(-0.03f);
         setStyle(mStyle);
     }
 
@@ -73,6 +69,7 @@ public class SportDigitalClockModule implements Module {
             }
             hourString = String.valueOf(hour);
         }
+
         String minuteString = String.valueOf(mCalendar.get(Calendar.MINUTE));
         if (minuteString.length() == 1) {
             minuteString = "0" + minuteString;
@@ -119,8 +116,8 @@ public class SportDigitalClockModule implements Module {
     @Override
     public void setAmbient(boolean ambient) {
         mAmbient = ambient;
-        if(mBurnInProtection) {
-            if(mAmbient) {
+        if (mBurnInProtection) {
+            if (mAmbient) {
                 changeStyle(2);
             } else {
                 changeStyle(mStyle);

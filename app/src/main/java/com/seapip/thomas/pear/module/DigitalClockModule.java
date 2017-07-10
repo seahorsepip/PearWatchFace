@@ -35,7 +35,10 @@ public class DigitalClockModule implements Module {
         mTextPaint.setTypeface(mFontLight);
         backgroundPaint = new Paint();
         backgroundPaint.setColor(Color.argb(20, 0, 255, 0));
+    }
 
+    public void setTimeFormat24(boolean timeFormat24) {
+        mTimeFormat24 = timeFormat24;
     }
 
     @Override

@@ -48,6 +48,10 @@ public class SportDigitalClockModule implements Module {
         setStyle(mStyle);
     }
 
+    public void setTimeFormat24(boolean timeFormat24) {
+        mTimeFormat24 = timeFormat24;
+    }
+
     @Override
     public void setBounds(Rect bounds) {
         mBounds = bounds;

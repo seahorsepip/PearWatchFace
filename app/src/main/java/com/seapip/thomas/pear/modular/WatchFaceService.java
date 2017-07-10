@@ -16,6 +16,7 @@ import android.preference.PreferenceManager;
 import android.support.wearable.complications.ComplicationData;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
+import android.text.format.DateFormat;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
@@ -136,7 +137,8 @@ public class WatchFaceService extends CanvasWatchFaceService {
             mBottomLeftComplicationModule = new ComplicationModule(getApplicationContext());
             mBottomCenterComplicationModule = new ComplicationModule(getApplicationContext());
             mBottomRightComplicationModule = new ComplicationModule(getApplicationContext());
-            mDigitalClockModule = new DigitalClockModule(mCalendar, true);
+            mDigitalClockModule = new DigitalClockModule(mCalendar,
+                    DateFormat.is24HourFormat(WatchFaceService.this));
 
             mModules = new ArrayList<>();
             mModules.add(mTopLeftComplicationModule);
@@ -324,6 +326,8 @@ public class WatchFaceService extends CanvasWatchFaceService {
                 registerReceiver();
                 /* Update time zone in case it changed while we weren't visible. */
                 mCalendar.setTimeZone(TimeZone.getDefault());
+                mDigitalClockModule.setTimeFormat24(
+                        DateFormat.is24HourFormat(WatchFaceService.this));
                 invalidate();
             } else {
                 unregisterReceiver();

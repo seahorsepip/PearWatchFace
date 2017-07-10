@@ -8,9 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -18,11 +16,11 @@ import android.preference.PreferenceManager;
 import android.support.wearable.complications.ComplicationData;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
+import android.text.format.DateFormat;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
-import com.seapip.thomas.pear.R;
 import com.seapip.thomas.pear.module.ComplicationModule;
 import com.seapip.thomas.pear.module.Module;
 import com.seapip.thomas.pear.module.SportDigitalClockModule;
@@ -133,7 +131,8 @@ public class WatchFaceService extends CanvasWatchFaceService {
             mTopLeftComplicationModule = new ComplicationModule(context);
             mCenterLeftComplicationModule = new ComplicationModule(context);
             mBottomLeftComplicationModule = new ComplicationModule(context);
-            mSportDigitalClockModule = new SportDigitalClockModule(context, mCalendar, true, style);
+            mSportDigitalClockModule = new SportDigitalClockModule(context, mCalendar,
+                    DateFormat.is24HourFormat(WatchFaceService.this), style);
 
             mModules = new ArrayList<>();
             mModules.add(mTopLeftComplicationModule);
@@ -312,6 +311,8 @@ public class WatchFaceService extends CanvasWatchFaceService {
                 registerReceiver();
                 /* Update time zone in case it changed while we weren't visible. */
                 mCalendar.setTimeZone(TimeZone.getDefault());
+                mSportDigitalClockModule.setTimeFormat24(
+                        DateFormat.is24HourFormat(WatchFaceService.this));
                 invalidate();
             } else {
                 unregisterReceiver();

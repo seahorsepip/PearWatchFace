@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    buildToolsVersion "25.0.3"
     defaultConfig {
         applicationId "com.seapip.thomas.pear_watchface"
         minSdkVersion 25
         targetSdkVersion 25
         versionCode 6
-        versionName "2.1.2"
+        versionName "2.1.3"
     }
     buildTypes {
         release {
@@ -20,8 +20,8 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    provided 'com.google.android.wearable:wearable:2.0.1'
-    compile 'com.google.android.support:wearable:2.0.1'
-    compile 'com.google.android.gms:play-services-wearable:10.2.4'
+    provided 'com.google.android.wearable:wearable:2.0.3'
+    compile 'com.google.android.support:wearable:2.0.3'
+    compile 'com.google.android.gms:play-services-wearable:11.0.0'
     compile 'org.jraf:android-wear-color-picker:1.0.1'
 }

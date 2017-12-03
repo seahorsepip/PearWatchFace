@@ -51,12 +51,14 @@ public class WatchFaceService extends CanvasWatchFaceService {
     private static final int RIGHT_COMPLICATION = 2;
     private static final int BOTTOM_LEFT_COMPLICATION = 3;
     private static final int BOTTOM_RIGHT_COMPLICATION = 4;
+    private static final int LEFT_COMPLICATION = 5;
     public static final int[] COMPLICATION_IDS = {
             TOP_LEFT_COMPLICATION,
             TOP_RIGHT_COMPLICATION,
             RIGHT_COMPLICATION,
             BOTTOM_LEFT_COMPLICATION,
-            BOTTOM_RIGHT_COMPLICATION
+            BOTTOM_RIGHT_COMPLICATION,
+            LEFT_COMPLICATION
     };
     private static final int MSG_UPDATE_TIME = 0;
 
@@ -117,6 +119,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
         private ComplicationModule mTopLeftComplicationModule;
         private ComplicationModule mTopRightComplicationModule;
         private ComplicationModule mRightComplicationModule;
+        private ComplicationModule mLeftComplicationModule;
         private ComplicationModule mBottomLeftComplicationModule;
         private ComplicationModule mBottomRightComplicationModule;
         private ChronographTicksModule mChronographTicksModule;
@@ -153,6 +156,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
             mTopLeftComplicationModule = new ComplicationModule(context);
             mTopRightComplicationModule = new ComplicationModule(context);
             mRightComplicationModule = new ComplicationModule(context);
+            mLeftComplicationModule = new ComplicationModule(context);
             mBottomLeftComplicationModule = new ComplicationModule(context);
             mBottomRightComplicationModule = new ComplicationModule(context);
             mChronographTicksModule = new ChronographTicksModule(12);
@@ -171,6 +175,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
             mModules.add(mRightComplicationModule);
             mModules.add(mBottomLeftComplicationModule);
             mModules.add(mBottomRightComplicationModule);
+            mModules.add(mLeftComplicationModule);
             mModules.add(mChronographTicksModule);
             mModules.add(mStartButtonModule);
             mModules.add(mContinueButtonModule);
@@ -186,6 +191,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
                 module.setColor(Color.parseColor("#747474"));
             }
             mRightComplicationModule.setColor(color);
+            mLeftComplicationModule.setColor(color);
             mStartButtonModule.setColor(color);
             mContinueButtonModule.setColor(color);
             mPauseButtonModule.setColor(accentColor);
@@ -290,6 +296,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     bounds.centerY() - size / 2,
                     bounds.left + offset + size,
                     bounds.centerY() + size / 2);
+            mLeftComplicationModule.setBounds(leftDialBounds);
             mStartButtonModule.setBounds(leftDialBounds);
             mContinueButtonModule.setBounds(leftDialBounds);
             mPauseButtonModule.setBounds(leftDialBounds);
@@ -420,7 +427,11 @@ public class WatchFaceService extends CanvasWatchFaceService {
                     mLapButtonModule.draw(canvas);
                 }
             } else {
-                mStartButtonModule.draw(canvas);
+                if (mAmbient || SETTINGS_MODE > 1){
+                    mLeftComplicationModule.draw(canvas);
+                }else {
+                    mStartButtonModule.draw(canvas);
+                }
                 mRightComplicationModule.draw(canvas);
             }
             if (!mIsRound) {

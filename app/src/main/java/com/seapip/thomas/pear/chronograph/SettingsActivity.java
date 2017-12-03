@@ -136,6 +136,20 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                         WatchFaceService.COMPLICATION_IDS[1],
                         WatchFaceService.COMPLICATION_SUPPORTED_TYPES[1]);
                 topRightComplicationOverlay.setBottomTitle(true);
+                // left
+                SettingsOverlay leftComplicationOverlay = new SettingsOverlay(
+                        new Rect(insetBounds.left + offset,
+                                insetBounds.centerY() - size / 2,
+                                insetBounds.left + offset + size,
+                                insetBounds.centerY() + size / 2),
+                        bounds,
+                        "Off",
+                        Paint.Align.LEFT);
+                setComplicationOverlay(leftComplicationOverlay,
+                        WatchFaceService.class,
+                        WatchFaceService.COMPLICATION_IDS[5],
+                        WatchFaceService.COMPLICATION_SUPPORTED_TYPES[5]);
+                // right
                 SettingsOverlay rightComplicationOverlay = new SettingsOverlay(
                         new Rect(insetBounds.right - offset - size - size / 3,
                                 insetBounds.centerY() - size / 2,
@@ -149,7 +163,8 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                         WatchFaceService.COMPLICATION_IDS[2],
                         WatchFaceService.COMPLICATION_SUPPORTED_TYPES[2]);
                 if(WatchFaceService.ROUND) {
-                    rightComplicationOverlay.setActive(true);
+                    //rightComplicationOverlay.setActive(true);
+                    leftComplicationOverlay.setActive(true);
                 } else {
                     topLeftComplicationOverlay.setActive(true);
                 }
@@ -188,6 +203,7 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                 mComplicationModules.add(rightComplicationOverlay);
                 mComplicationModules.add(bottomLeftComplicationOverlay);
                 mComplicationModules.add(bottomRightComplicationOverlay);
+                mComplicationModules.add(leftComplicationOverlay);
 
                 ArrayList<SettingsOverlay> finishModules = new ArrayList<>();
                 SettingsFinish finishOverlay = new SettingsFinish(getApplicationContext(),

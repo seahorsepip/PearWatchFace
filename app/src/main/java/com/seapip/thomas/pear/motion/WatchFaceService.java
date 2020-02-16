@@ -27,6 +27,7 @@ import com.seapip.thomas.pear.module.DigitalClockModule;
 import com.seapip.thomas.pear.module.Module;
 
 import java.lang.ref.WeakReference;
+import android.text.format.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -135,7 +136,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
             mBottomLeftComplicationModule = new ComplicationModule(context);
             mBottomCenterComplicationModule = new ComplicationModule(context);
             mBottomRightComplicationModule = new ComplicationModule(context);
-            mDigitalClockModule = new DigitalClockModule(mCalendar, true);
+            mDigitalClockModule = new DigitalClockModule(mCalendar, DateFormat.is24HourFormat(WatchFaceService.this));
             mMotionDateModule = new MotionDateModule(mCalendar, date);
 
             mModules = new ArrayList<>();

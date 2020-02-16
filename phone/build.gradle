@@ -1,15 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
 
     defaultConfig {
         applicationId "com.seapip.thomas.pear_watchface"
         minSdkVersion 19
-        targetSdkVersion 25
-        versionCode 3
-        versionName "2.0.0"
+        targetSdkVersion 29
+        versionCode 4
+        versionName "2.1.0"
     }
     buildTypes {
         release {
@@ -20,7 +20,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:25.2.0'
-    compile 'com.github.paolorotolo:appintro:4.1.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'com.github.paolorotolo:appintro:4.1.0'
 }

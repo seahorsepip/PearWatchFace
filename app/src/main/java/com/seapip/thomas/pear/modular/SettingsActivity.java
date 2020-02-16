@@ -1,22 +1,19 @@
 package com.seapip.thomas.pear.modular;
 
 import android.content.ComponentName;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.wearable.complications.ComplicationHelperActivity;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import android.support.wearable.complications.ComplicationProviderInfo;
 import android.support.wearable.complications.ProviderInfoRetriever;
 import android.support.wearable.view.GridViewPager;
 import android.util.DisplayMetrics;
 
-import com.seapip.thomas.pear.ColorActivity;
 import com.seapip.thomas.pear.R;
 import com.seapip.thomas.pear.settings.SettingsAdapter;
 import com.seapip.thomas.pear.settings.SettingsFinish;

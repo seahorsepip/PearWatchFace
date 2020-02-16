@@ -4,10 +4,9 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.support.wearable.complications.ComplicationHelperActivity;
 import android.support.wearable.complications.ComplicationProviderInfo;
 import android.support.wearable.complications.ProviderChooserIntent;
@@ -16,7 +15,6 @@ import android.support.wearable.view.GridViewPager;
 
 import com.seapip.thomas.pear.ColorActivity;
 import com.seapip.thomas.pear.R;
-import com.seapip.thomas.pear.modular.WatchFaceService;
 
 import java.util.ArrayList;
 

@@ -96,18 +96,31 @@ public class SportDigitalClockModule implements Module {
     }
 
     private void changeStyle(int style) {
+        if (mBounds == null) return;
         switch (style) {
             case 0: //Both filled
                 mHourTextPaint.setStyle(Paint.Style.FILL_AND_STROKE);
                 mMinuteTextPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+                mHourTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
+                mMinuteTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
                 break;
             case 1: //Top filled and bottom stroke
                 mHourTextPaint.setStyle(Paint.Style.FILL_AND_STROKE);
                 mMinuteTextPaint.setStyle(Paint.Style.STROKE);
+                mHourTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
+                mMinuteTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
                 break;
             case 2: //Top and bottom stroke
                 mHourTextPaint.setStyle(Paint.Style.STROKE);
                 mMinuteTextPaint.setStyle(Paint.Style.STROKE);
+                mHourTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
+                mMinuteTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
+                break;
+            case 3: //Top and bottom stroke with bottom thinner
+                mHourTextPaint.setStyle(Paint.Style.STROKE);
+                mMinuteTextPaint.setStyle(Paint.Style.STROKE);
+                mHourTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
+                mMinuteTextPaint.setStrokeWidth(mBounds.height() * 0.007f);
                 break;
         }
     }
@@ -118,15 +131,11 @@ public class SportDigitalClockModule implements Module {
         switch (size) {
             case 0: //Big
                 mHourTextPaint.setTextSize(mBounds.height() * 0.54f);
-                mHourTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
                 mMinuteTextPaint.setTextSize(mBounds.height() * 0.54f);
-                mMinuteTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
                 break;
             case 1: //Small
                 mHourTextPaint.setTextSize(mBounds.height() * 0.40f);
-                mHourTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
                 mMinuteTextPaint.setTextSize(mBounds.height() * 0.40f);
-                mMinuteTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
                 break;
         }
     }

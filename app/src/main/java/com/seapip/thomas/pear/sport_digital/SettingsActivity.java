@@ -65,7 +65,7 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                     public void run() {
                         int style = preferences.getInt("settings_sport_digital_style", 0);
                         style++;
-                        style = style > 2 ? 0 : style;
+                        style = style > 3 ? 0 : style;
                         preferences.edit().putInt("settings_sport_digital_style", style).apply();
                         setSettingsMode(true);
                     }

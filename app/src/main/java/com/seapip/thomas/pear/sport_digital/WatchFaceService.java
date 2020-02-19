@@ -126,6 +126,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
             setActiveComplications(COMPLICATION_IDS);
 
             int style = mPrefs.getInt("settings_sport_digital_style", 0);
+            int sizeStyle = mPrefs.getInt("settings_sport_digital_size_style", 0);
             int colorStyle = mPrefs.getInt("settings_sport_digital_color_style", 0);
 
             mTopLeftComplicationModule = new ComplicationModule(context);
@@ -146,6 +147,7 @@ public class WatchFaceService extends CanvasWatchFaceService {
                 module.setColor(color);
             }
             mSportDigitalClockModule.setColor(colorStyle == 0 ? color : Color.WHITE);
+            mSportDigitalClockModule.setSize(sizeStyle);
         }
 
         @Override
@@ -281,11 +283,13 @@ public class WatchFaceService extends CanvasWatchFaceService {
                 case 3:
                     int style = mPrefs.getInt("settings_sport_digital_style", 0);
                     int colorStyle = mPrefs.getInt("settings_sport_digital_color_style", 0);
+                    int sizeStyle = mPrefs.getInt("settings_sport_digital_size_style", 0);
                     int color = mPrefs.getInt("settings_sport_digital_color_value", Color.parseColor("#CDDC39"));
                     for (Module module : mModules) {
                         module.setColor(color);
                     }
                     mSportDigitalClockModule.setStyle(style);
+                    mSportDigitalClockModule.setSize(sizeStyle);
                     mSportDigitalClockModule.setColor(colorStyle == 0 ? color : Color.WHITE);
                     setBounds();
                     mWatchFaceStyleBuilder.setHideStatusBar(true);

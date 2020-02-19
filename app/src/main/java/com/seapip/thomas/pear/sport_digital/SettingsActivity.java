@@ -72,6 +72,28 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
                 });
                 styleModules.add(styleOverlay);
 
+                ArrayList<SettingsOverlay> sizeStyleModules = new ArrayList<>();
+                SettingsOverlay sizeStyleOverlay = new SettingsOverlay(
+                        new Rect(
+                                bounds.right - (bounds.width() - MODULE_SPACING * 2) / 3 * 2 - MODULE_SPACING,
+                                bounds.top,
+                                bounds.right,
+                                bounds.bottom),
+                        bounds, "Size",
+                        Paint.Align.RIGHT);
+                sizeStyleOverlay.setActive(true);
+                sizeStyleOverlay.setRunnable(new Runnable() {
+                    @Override
+                    public void run() {
+                        int sizeStyle = preferences.getInt("settings_sport_digital_size_style", 0);
+                        sizeStyle++;
+                        sizeStyle = sizeStyle > 1 ? 0 : sizeStyle;
+                        preferences.edit().putInt("settings_sport_digital_size_style", sizeStyle).apply();
+                        setSettingsMode(true);
+                    }
+                });
+                sizeStyleModules.add(sizeStyleOverlay);
+
                 int colorStyle = preferences.getInt("settings_sport_digital_color_style", 0);
                 String colorName = preferences.getString("settings_sport_digital_color_name", "Cyan");
                 ArrayList<SettingsOverlay> colorStyleModules = new ArrayList<>();
@@ -167,6 +189,7 @@ public class SettingsActivity extends com.seapip.thomas.pear.settings.SettingsAc
 
                 SettingsRow row = new SettingsRow();
                 row.addPages(new SettingsPage(styleModules));
+                row.addPages(new SettingsPage(sizeStyleModules));
                 row.addPages(new SettingsPage(colorStyleModules));
                 row.addPages(new SettingsPage(colorModules));
                 row.addPages(new SettingsPage(mComplicationModules));

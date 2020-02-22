@@ -151,7 +151,7 @@ public class SportDigitalClockModule implements Module {
         mAmbient = ambient;
         if (mBurnInProtection) {
             if (mAmbient) {
-                changeStyle(2);
+                changeStyle(mStyle < 2 ? 2 : mStyle);
             } else {
                 changeStyle(mStyle);
             }

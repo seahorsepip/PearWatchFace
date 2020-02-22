@@ -14,6 +14,7 @@ public class SportDigitalClockModule implements Module {
     private Calendar mCalendar;
     private boolean mTimeFormat24;
     private int mStyle;
+    private int mSize;
     private boolean mAmbient;
     private boolean mBurnInProtection;
 
@@ -30,6 +31,7 @@ public class SportDigitalClockModule implements Module {
         mCalendar = calendar;
         mTimeFormat24 = timeFormat24;
         mStyle = style;
+        mSize = 0; // default size unless told otherwise
 
         /* Fonts */
         mFontBold = Typeface.createFromAsset(mContext.getAssets(), "fonts/Sport.ttf");
@@ -55,10 +57,7 @@ public class SportDigitalClockModule implements Module {
     @Override
     public void setBounds(Rect bounds) {
         mBounds = bounds;
-        mHourTextPaint.setTextSize(bounds.height() * 0.54f);
-        mHourTextPaint.setStrokeWidth(bounds.height() * 0.015f);
-        mMinuteTextPaint.setTextSize(bounds.height() * 0.54f);
-        mMinuteTextPaint.setStrokeWidth(bounds.height() * 0.015f);
+        setSize(mSize);
     }
 
     @Override
@@ -79,14 +78,16 @@ public class SportDigitalClockModule implements Module {
             minuteString = "0" + minuteString;
         }
 
+        int offset = mSize == 0 ? 0 : 15;
         canvas.drawText(hourString,
-                mBounds.right - mBounds.width() * 0.1f,
-                mBounds.top + mBounds.width() * 0.07f - (mHourTextPaint.descent() + mHourTextPaint.ascent()),
+                mBounds.right - mBounds.width() * 0.1f - offset,
+                mBounds.top + mBounds.width() * 0.07f - (mHourTextPaint.descent() + mHourTextPaint.ascent()) + offset,
                 mHourTextPaint);
         canvas.drawText(minuteString,
-                mBounds.right - mBounds.width() * 0.1f,
-                mBounds.bottom - mBounds.width() * 0.1f,
+                mBounds.right - mBounds.width() * 0.1f - offset,
+                mBounds.bottom - mBounds.width() * 0.1f - offset,
                 mMinuteTextPaint);
+
     }
 
     public void setStyle(int style) {
@@ -95,18 +96,46 @@ public class SportDigitalClockModule implements Module {
     }
 
     private void changeStyle(int style) {
+        if (mBounds == null) return;
         switch (style) {
             case 0: //Both filled
                 mHourTextPaint.setStyle(Paint.Style.FILL_AND_STROKE);
                 mMinuteTextPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+                mHourTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
+                mMinuteTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
                 break;
             case 1: //Top filled and bottom stroke
                 mHourTextPaint.setStyle(Paint.Style.FILL_AND_STROKE);
                 mMinuteTextPaint.setStyle(Paint.Style.STROKE);
+                mHourTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
+                mMinuteTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
                 break;
             case 2: //Top and bottom stroke
                 mHourTextPaint.setStyle(Paint.Style.STROKE);
                 mMinuteTextPaint.setStyle(Paint.Style.STROKE);
+                mHourTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
+                mMinuteTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
+                break;
+            case 3: //Top and bottom stroke with bottom thinner
+                mHourTextPaint.setStyle(Paint.Style.STROKE);
+                mMinuteTextPaint.setStyle(Paint.Style.STROKE);
+                mHourTextPaint.setStrokeWidth(mBounds.height() * 0.015f);
+                mMinuteTextPaint.setStrokeWidth(mBounds.height() * 0.007f);
+                break;
+        }
+    }
+
+    public void setSize(int size) {
+        mSize = size;
+        if (mBounds == null) return;
+        switch (size) {
+            case 0: //Big
+                mHourTextPaint.setTextSize(mBounds.height() * 0.54f);
+                mMinuteTextPaint.setTextSize(mBounds.height() * 0.54f);
+                break;
+            case 1: //Small
+                mHourTextPaint.setTextSize(mBounds.height() * 0.40f);
+                mMinuteTextPaint.setTextSize(mBounds.height() * 0.40f);
                 break;
         }
     }
@@ -122,7 +151,7 @@ public class SportDigitalClockModule implements Module {
         mAmbient = ambient;
         if (mBurnInProtection) {
             if (mAmbient) {
-                changeStyle(2);
+                changeStyle(mStyle < 2 ? 2 : mStyle);
             } else {
                 changeStyle(mStyle);
             }
